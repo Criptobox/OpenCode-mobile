@@ -16,12 +16,14 @@ class RuntimeService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val rt = OcRuntime(this)
+        val ready = rt.isInstalled()
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(NotificationChannel("rt", "OpenCode", NotificationManager.IMPORTANCE_LOW))
         val pi = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         val n = Notification.Builder(this, "rt")
             .setContentTitle("OpenCode activo")
-            .setContentText("Servidor local en 127.0.0.1:4096")
+            .setContentText(if (ready) "Servidor local en 127.0.0.1:4096" else "Instalando entorno…")
             .setSmallIcon(R.drawable.ic_stat)
             .setContentIntent(pi)
             .setOngoing(true)
@@ -32,7 +34,7 @@ class RuntimeService : Service() {
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "opencode:runtime").apply { acquire() }
         }
         val p = proc
-        if (p == null || !p.isAlive) proc = OcRuntime(this).startServer()
+        if (ready && (p == null || !p.isAlive)) proc = rt.startServer()
         return START_STICKY
     }
 

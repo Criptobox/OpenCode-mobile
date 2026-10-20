@@ -2,6 +2,7 @@ package app.opencodemobile
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -12,6 +13,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
+import android.view.WindowManager
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -34,6 +36,7 @@ class MainActivity : Activity() {
     private lateinit var scroll: ScrollView
     private lateinit var retry: Button
     private lateinit var bar: ProgressBar
+    private lateinit var pct: TextView
     private val ui = Handler(Looper.getMainLooper())
     private val logBuf = StringBuilder()
 
@@ -78,7 +81,12 @@ class MainActivity : Activity() {
             setTypeface(typeface, Typeface.BOLD)
             setTextColor(getColor(R.color.text))
         }
-        bar = ProgressBar(this).apply { isIndeterminate = true }
+        bar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            max = 1000; isIndeterminate = true
+            progressTintList = ColorStateList.valueOf(getColor(R.color.accent))
+            progressBackgroundTintList = ColorStateList.valueOf(getColor(R.color.bg))
+        }
+        pct = TextView(this).apply { text = ""; textSize = 12f; setTextColor(getColor(R.color.muted)) }
         logView = TextView(this).apply {
             typeface = Typeface.MONOSPACE; textSize = 11f
             setTextColor(getColor(R.color.muted))
@@ -91,8 +99,9 @@ class MainActivity : Activity() {
             setOnClickListener { start() }
         }
         card.addView(status)
-        card.addView(bar)
-        card.addView(scroll, LinearLayout.LayoutParams(-1, dp(260)))
+        card.addView(bar, LinearLayout.LayoutParams(-1, dp(12)).apply { topMargin = dp(14) })
+        card.addView(pct, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(6); bottomMargin = dp(10) })
+        card.addView(scroll, LinearLayout.LayoutParams(-1, dp(200)))
         card.addView(retry, LinearLayout.LayoutParams(-1, dp(48)).apply { topMargin = dp(12) })
         col.addView(card, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(24) })
         return col
@@ -129,10 +138,19 @@ class MainActivity : Activity() {
         bar.visibility = View.VISIBLE
         Thread {
             try {
+                ui.post { window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+                startForegroundService(Intent(this, RuntimeService::class.java))
                 if (!rt.isInstalled()) {
-                    setStatus("Instalando entorno (solo la primera vez)")
-                    rt.install { appendLog(it) }
+                    rt.install({ p, msg ->
+                        ui.post {
+                            bar.isIndeterminate = false
+                            bar.progress = p
+                            status.text = msg
+                            pct.text = "${p / 10}%"
+                        }
+                    }, { appendLog(it) })
                 }
+                ui.post { bar.isIndeterminate = true; pct.text = "" }
                 setStatus("Iniciando OpenCode…")
                 startForegroundService(Intent(this, RuntimeService::class.java))
                 var tries = 0
@@ -154,6 +172,7 @@ class MainActivity : Activity() {
     }
 
     private fun show() {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setup.visibility = View.GONE
         web.visibility = View.VISIBLE
         web.loadUrl("http://127.0.0.1:${rt.port}")

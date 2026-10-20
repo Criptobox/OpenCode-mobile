@@ -10,9 +10,17 @@ android {
         minSdk = 26
         // 28: permite ejecutar binarios (PRoot) igual que Termux. Solo instalación manual (APK).
         targetSdk = 28
-        versionCode = 1
+        versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
         versionName = "0.1.0"
         ndk { abiFilters += "arm64-v8a" }
+    }
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
     packaging { jniLibs { useLegacyPackaging = true } }
     compileOptions {
