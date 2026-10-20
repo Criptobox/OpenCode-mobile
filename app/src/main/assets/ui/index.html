@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OpenCode</title>
+<style>
+:root{--bg:#F3F4F8;--card:#fff;--text:#14161C;--muted:#6B7280;--acc:#5B5BD6;--soft:#ECECFB;--sofft:#4A4AC4;--mint:#DDF5EA;--mintt:#0F7B55;--amber:#FFF1D6;--ambert:#9A5B00;--nav:#14161C;--sh:0 2px 14px rgba(20,22,28,.07);--del:#FDECEE;--delt:#B4232F}
+@media(prefers-color-scheme:dark){:root{--bg:#0E1015;--card:#1A1D25;--text:#F2F3F7;--muted:#9AA3B2;--soft:#25254A;--sofft:#B4B4F5;--mint:#12392B;--mintt:#6EDCA8;--amber:#3A2D10;--ambert:#F5C26B;--nav:#262B36;--sh:0 2px 14px rgba(0,0,0,.35);--del:#3A1A1E;--delt:#F2A0A6}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:400 15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#view{height:100dvh;overflow-y:auto;padding:28px 20px 110px}
+h1{font-size:28px;line-height:1.15;margin:4px 0 0;font-weight:700}
+.muted{color:var(--muted)}.sm{font-size:13px}.row{display:flex;align-items:center;gap:12px}.sp{justify-content:space-between}
+.badge{font:600 11px system-ui;padding:5px 10px;border-radius:999px;white-space:nowrap;background:var(--soft);color:var(--sofft)}
+.badge.g{background:var(--mint);color:var(--mintt)}.badge.a{background:var(--amber);color:var(--ambert)}
+.card{background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--sh)}
+.hero{background:var(--acc);color:#fff;border-radius:28px;padding:22px;margin-top:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 24px rgba(91,91,214,.28)}
+.hero .badge{background:rgba(255,255,255,.22);color:#fff}
+.btn{min-height:50px;border:0;border-radius:18px;font:700 15px system-ui;background:#fff;color:#3F3FB8;width:100%}
+.btn.p{background:var(--acc);color:#fff}.btn.s{background:var(--card);color:var(--text)}
+h2{font-size:18px;margin:26px 0 12px}
+.list{display:flex;flex-direction:column;gap:12px}
+.ico{width:44px;height:44px;border-radius:14px;background:var(--soft);color:var(--sofft);display:flex;align-items:center;justify-content:center;flex:none}
+.grow{flex:1;min-width:0}.t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav{position:fixed;left:20px;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));height:68px;border-radius:34px;background:var(--nav);display:flex;justify-content:space-around;align-items:center;padding:0 8px;z-index:5}
+.nav a{display:flex;align-items:center;gap:8px;color:#AEB4C0;text-decoration:none;font:600 13px system-ui;min-height:48px;padding:0 14px;border-radius:24px}
+.nav a.on{background:var(--acc);color:#fff}
+.chat{display:flex;flex-direction:column;height:100dvh}
+.top{padding:20px 16px 10px;display:flex;align-items:center;gap:10px}
+.rb{width:44px;height:44px;border:0;border-radius:22px;background:var(--card);color:var(--text);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;flex:none}
+#msgs{flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px}
+.b{max-width:86%;padding:12px 16px;border-radius:22px;word-wrap:break-word;overflow-wrap:anywhere}
+.b.u{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:6px}
+.b.a{background:var(--card);box-shadow:var(--sh);border-bottom-left-radius:6px}
+.b pre{background:var(--bg);border-radius:12px;padding:10px;overflow-x:auto;font:12px/1.5 ui-monospace,monospace;margin:8px 0;white-space:pre}
+.b code{font:12px ui-monospace,monospace;background:var(--bg);padding:1px 5px;border-radius:6px}
+.tool{background:var(--soft);color:var(--sofft);border-radius:14px;padding:9px 14px;font:500 12px ui-monospace,monospace;align-self:flex-start;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perm{margin:0 16px 8px;background:var(--amber);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.perm b{color:var(--ambert)}.perm .c{background:var(--card);border-radius:12px;padding:8px 12px;font:12px ui-monospace,monospace;overflow-wrap:anywhere}
+.comp{margin:6px 16px calc(16px + env(safe-area-inset-bottom));background:var(--card);border-radius:30px;box-shadow:var(--sh);display:flex;align-items:flex-end;gap:8px;padding:8px}
+.comp textarea{flex:1;border:0;outline:0;background:none;color:var(--text);font:15px/1.4 system-ui;resize:none;max-height:120px;padding:10px 6px}
+.send{width:44px;height:44px;border:0;border-radius:22px;background:var(--acc);color:#fff;flex:none;display:flex;align-items:center;justify-content:center}
+.opt{display:flex;align-items:center;gap:12px;border:2px solid transparent}.opt.sel{border-color:var(--acc)}
+.dot{width:24px;height:24px;border-radius:12px;border:2px solid #9AA3B2;flex:none;display:flex;align-items:center;justify-content:center;color:#fff}
+.opt.sel .dot{background:var(--acc);border-color:var(--acc)}
+.note{background:var(--amber);color:var(--ambert);border-radius:18px;padding:12px 14px;font-size:13px;margin-top:16px}
+.empty{text-align:center;padding:30px 10px}
+</style></head><body>
+<div id="view"></div>
+<script>
+const $=s=>document.querySelector(s), J={'content-type':'application/json'};
+const api=(p,o)=>fetch(p,o).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.status===204?null:r.json().catch(()=>null)});
+const st={get:(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let S={sessions:[],models:[],model:st.get('model',null),cur:null,msgs:[],busy:false,perm:null,err:''};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10'};
+function md(s){s=esc(s);s=s.replace(/```[\w-]*\n?([\s\S]*?)```/g,(_,c)=>'<pre>'+c+'</pre>');s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');return s.split(/(<pre>[\s\S]*?<\/pre>)/).map(x=>x.startsWith('<pre>')?x:x.replace(/\n/g,'<br>')).join('')}
+function ago(t){const s=(Date.now()-t)/1000;if(s<60)return'ahora';if(s<3600)return'hace '+Math.floor(s/60)+' min';if(s<86400)return'hace '+Math.floor(s/3600)+' h';return'hace '+Math.floor(s/86400)+' d'}
+const curModel=()=>S.models.find(m=>S.model&&m.p===S.model.p&&m.id===S.model.id);
+
+async function loadModels(){
+  const r=await api('/config/providers'),ps=Array.isArray(r.providers)?r.providers:Object.values(r.providers||{}),out=[];
+  for(const p of ps){const ms=p.models||{};for(const id in ms){const m=ms[id];out.push({p:p.id,pn:p.name||p.id,id:m.id||id,name:m.name||id,free:!!(m.cost&&m.cost.input===0&&m.cost.output===0)})}}
+  out.sort((a,b)=>b.free-a.free);S.models=out;
+  if(!curModel()){const f=out[0];if(f)S.model={p:f.p,id:f.id}}
+}
+async function loadSessions(){const r=await api('/session');S.sessions=(r||[]).sort((a,b)=>((b.time||{}).updated||0)-((a.time||{}).updated||0))}
+async function loadMsgs(){if(!S.cur)return;try{S.msgs=await api('/session/'+S.cur+'/message')||[];const l=S.msgs[S.msgs.length-1];S.busy=!!(l&&l.info.role==='assistant'&&!(l.info.time&&l.info.time.completed));drawMsgs()}catch(e){}}
+
+function nav(on){return `<nav class="nav"><a href="#/" class="${on==='h'?'on':''}">${ic(I.home,20)}${on==='h'?'Inicio':''}</a><a href="#/models" class="${on==='m'?'on':''}">${ic(I.star,20)}${on==='m'?'Modelos':''}</a><a href="/">${ic(I.cls,20)}</a></nav>`}
+function route(){
+  const h=location.hash||'#/',v=$('#view');S.cur=null;
+  if(h.startsWith('#/s/')){S.cur=h.slice(4);v.style.padding='0';v.innerHTML=chatShell();bindChat();loadMsgs();return}
+  v.style.padding='28px 20px 110px';
+  if(h==='#/models'){v.innerHTML=modelsView();v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);route()})}
+  else{v.innerHTML=homeView();$('#new').onclick=newSession;v.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s)}
+}
+function homeView(){const m=curModel();
+  const list=S.sessions.length?S.sessions.slice(0,30).map(s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div></div>`).join(''):`<div class="card empty muted">Crea una sesión para empezar</div>`;
+  return `<div class="row sp"><div><div class="muted sm">Hola</div><h1>¿Qué construimos<br>hoy?</h1></div></div>
+  ${S.err?`<div class="note">${esc(S.err)}</div>`:''}
+  <div class="hero"><div class="row sp"><span class="sm" style="opacity:.85">Modelo activo</span>${m&&m.free?'<span class="badge">Gratis</span>':''}</div><div style="font:700 22px system-ui">${esc(m?m.name:'Sin modelo')}</div><button class="btn" id="new">+ Nueva sesión</button></div>
+  <h2>Recientes</h2><div class="list">${list}</div>${nav('h')}`}
+function modelsView(){
+  const opt=m=>`<div class="card opt ${curModel()===m?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}"><div class="grow"><div class="t">${esc(m.name)}</div><div class="muted sm">${esc(m.pn)}</div></div>${m.free?'<span class="badge g">Gratis</span>':''}<span class="dot">${curModel()===m?ic(I.check,14):''}</span></div>`;
+  return `<h1>Modelos</h1><div class="muted sm" style="margin-top:4px">Gratis desde OpenCode Zen</div><div class="note">Los modelos gratis lo son por tiempo limitado. La lista se actualiza sola desde el servidor.</div>
+  <div class="list" style="margin-top:16px">${S.models.map(opt).join('')||'<div class="card empty muted">No hay modelos disponibles</div>'}</div>
+  <a href="/" style="text-decoration:none"><button class="btn s" style="margin-top:18px;box-shadow:var(--sh)">Conectar proveedores / ajustes avanzados</button></a>${nav('m')}`}
+function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel();
+  return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" style="font-size:16px;font-weight:700">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
+  <div id="msgs"></div><div id="perm"></div>
+  <div class="comp"><textarea id="inp" rows="1" placeholder="Mensaje o /comando"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button></div></div>`}
+function bindChat(){
+  $('#bk').onclick=()=>{location.hash='#/'};
+  $('#del').onclick=async()=>{if(confirm('¿Eliminar esta sesión?')){try{await api('/session/'+S.cur,{method:'DELETE'})}catch(e){}await loadSessions();location.hash='#/'}};
+  const i=$('#inp');i.oninput=()=>{i.style.height='auto';i.style.height=Math.min(i.scrollHeight,120)+'px'};
+  $('#go').onclick=async()=>{
+    if(S.busy){try{await api('/session/'+S.cur+'/abort',{method:'POST'})}catch(e){}return}
+    const t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';
+    const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};
+    S.busy=true;S.msgs.push({info:{role:'user'},parts:[{type:'text',text:t}]});drawMsgs();
+    try{await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)})}catch(e){S.busy=false;S.err='No se pudo enviar';}
+    setTimeout(loadMsgs,400)};
+  drawPerm();
+}
+function drawMsgs(){const box=$('#msgs');if(!box)return;const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+  box.innerHTML=S.msgs.map(m=>{const r=m.info.role,ps=m.parts||[];
+    if(r==='user')return `<div class="b u">${md(ps.filter(p=>p.type==='text').map(p=>p.text).join('\n'))}</div>`;
+    return ps.map(p=>{
+      if(p.type==='text'&&p.text&&p.text.trim())return `<div class="b a">${md(p.text)}</div>`;
+      if(p.type==='tool'){const s=p.state||{},inp=s.input||{},d=s.title||inp.filePath||inp.command||inp.pattern||'';return `<div class="tool">${esc(p.tool)} ${esc(d)} ${s.status==='completed'?'· listo':s.status==='error'?'· error':'…'}</div>`}
+      return''}).join('')}).join('')+(S.busy?'<div class="tool">pensando…</div>':'');
+  const g=$('#go');if(g)g.innerHTML=ic(S.busy?I.stop:I.send,20);
+  if(near)box.scrollTop=box.scrollHeight}
+function drawPerm(){const e=$('#perm');if(!e)return;const p=S.perm;
+  e.innerHTML=p?`<div class="perm"><b>Permiso solicitado</b><div class="c">${esc(p.title)}${p.detail?'<br>'+esc(p.detail):''}</div><div class="row"><button class="btn p" id="ok">Permitir</button><button class="btn s" id="no">Denegar</button></div></div>`:'';
+  if(p){$('#ok').onclick=()=>answer('once');$('#no').onclick=()=>answer('reject')}}
+async function answer(k){const p=S.perm;S.perm=null;drawPerm();
+  try{await api('/permission/'+p.id+'/reply',{method:'POST',headers:J,body:JSON.stringify({reply:k})})}
+  catch(e){try{await api('/session/'+p.sessionID+'/permissions/'+p.id,{method:'POST',headers:J,body:JSON.stringify({response:k})})}catch(x){}}}
+async function newSession(){try{const s=await api('/session',{method:'POST',headers:J,body:'{}'});S.sessions.unshift(s);location.hash='#/s/'+s.id}catch(e){S.err='No se pudo crear la sesión';route()}}
+
+let deb;function ev(e){let d;try{d=JSON.parse(e.data)}catch(x){return}const t=d.type||'',p=d.properties||{};
+  if(/permission/.test(t)){if(/replied/.test(t)){S.perm=null}else{const id=p.id||p.requestID;if(id)S.perm={id,sessionID:p.sessionID,title:p.title||p.permission||'Ejecutar acción',detail:(p.metadata&&(p.metadata.command||p.metadata.filePath))||(p.patterns||[]).join(', ')}}drawPerm();return}
+  if(/^message\.|^session\.(idle|status|error)/.test(t)&&S.cur){clearTimeout(deb);deb=setTimeout(loadMsgs,150)}
+  if(/^session\.(updated|created|deleted)/.test(t)&&!S.cur)loadSessions().then(route)}
+try{const es=new EventSource('/event');es.onmessage=ev}catch(e){}
+setInterval(()=>{if(S.cur&&S.busy)loadMsgs()},2500);
+window.onhashchange=route;
+(async()=>{try{await Promise.all([loadModels(),loadSessions()])}catch(e){S.err='No pude cargar datos del servidor'}route()})();
+</script></body></html>

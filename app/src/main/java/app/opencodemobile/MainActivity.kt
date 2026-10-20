@@ -16,6 +16,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
@@ -39,6 +40,14 @@ class MainActivity : Activity() {
     private lateinit var pct: TextView
     private val ui = Handler(Looper.getMainLooper())
     private val logBuf = StringBuilder()
+
+    private fun mimeOf(n: String) = when {
+        n.endsWith(".html") -> "text/html"
+        n.endsWith(".js") -> "application/javascript"
+        n.endsWith(".css") -> "text/css"
+        n.endsWith(".svg") -> "image/svg+xml"
+        else -> "application/octet-stream"
+    }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
     private fun rounded(color: Int, r: Int) =
@@ -115,6 +124,17 @@ class MainActivity : Activity() {
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
         }
         webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+                val u = request.url
+                val path = u.path ?: return null
+                if (u.host == "127.0.0.1" && path.startsWith("/m/")) {
+                    val name = path.removePrefix("/m/").ifEmpty { "index.html" }
+                    return try {
+                        WebResourceResponse(mimeOf(name), "utf-8", assets.open("ui/$name"))
+                    } catch (e: Exception) { null }
+                }
+                return null
+            }
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val h = request.url.host
                 if (h == "127.0.0.1" || h == "localhost") return false
@@ -175,7 +195,7 @@ class MainActivity : Activity() {
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setup.visibility = View.GONE
         web.visibility = View.VISIBLE
-        web.loadUrl("http://127.0.0.1:${rt.port}")
+        web.loadUrl("http://127.0.0.1:${rt.port}/m/")
         val prefs = getSharedPreferences("app", MODE_PRIVATE)
         if (!prefs.getBoolean("battery_asked", false)) {
             prefs.edit().putBoolean("battery_asked", true).apply()
