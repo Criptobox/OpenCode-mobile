@@ -1,1 +1,34 @@
-
+name: Build APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descomprimir proyecto (si subiste el zip)
+        run: if [ -f opencode-mobile.zip ]; then unzip -oq opencode-mobile.zip; fi
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Bajar PRoot
+        run: python3 scripts/fetch_proot.py
+      - name: Compilar
+        run: gradle assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opencode-mobile-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: OpenCode Mobile build ${{ github.run_number }}
+          files: app/build/outputs/apk/debug/app-debug.apk
