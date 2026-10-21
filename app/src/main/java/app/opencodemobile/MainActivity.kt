@@ -127,6 +127,24 @@ class MainActivity : Activity() {
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
                 val u = request.url
                 val path = u.path ?: return null
+                if (u.host == "127.0.0.1" && path == "/m/zen-models") {
+                    // Proxy the official OpenCode Zen catalogue through the local origin to avoid WebView CORS issues.
+                    return try {
+                        val conn = java.net.URL("https://opencode.ai/zen/v1/models").openConnection() as java.net.HttpURLConnection
+                        conn.connectTimeout = 12000
+                        conn.readTimeout = 12000
+                        conn.setRequestProperty("Accept", "application/json")
+                        conn.setRequestProperty("User-Agent", "OpenCode-Mobile/0.2")
+                        val code = conn.responseCode
+                        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+                        val body = stream?.readBytes() ?: "{}".toByteArray()
+                        conn.disconnect()
+                        WebResourceResponse("application/json", "utf-8", java.io.ByteArrayInputStream(body))
+                    } catch (e: Exception) {
+                        val body = "{\"error\":\"official_catalog_unavailable\",\"message\":\"${e.message.orEmpty().replace("\"", "'")}\"}".toByteArray()
+                        WebResourceResponse("application/json", "utf-8", java.io.ByteArrayInputStream(body))
+                    }
+                }
                 if (u.host == "127.0.0.1" && path.startsWith("/m/")) {
                     val name = path.removePrefix("/m/").ifEmpty { "index.html" }
                     return try {
