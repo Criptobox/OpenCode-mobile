@@ -52,6 +52,7 @@ html,body{margin:0;height:100%;overflow:hidden}
 .tool{white-space:normal;text-overflow:clip;max-width:100%}
 .tool summary{list-style:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:20px}
 .tool summary::-webkit-details-marker{display:none}
+.chattools{display:flex;gap:7px;padding:4px 16px 8px;overflow-x:auto}.chattools button,.chattools select{flex:none;border:1px solid #263D5C;background:#142641;color:var(--text);border-radius:12px;min-height:36px;padding:0 10px;font:600 12px system-ui}.diff{border-radius:10px;overflow:auto;background:#071323;padding:8px;margin-top:8px;white-space:pre-wrap;word-break:break-word}.diff .add{color:#7DF0B5;display:block}.diff .del{color:#FF9AA8;display:block}.skeleton{height:48px;border-radius:16px;background:linear-gradient(90deg,#12243C,#203657,#12243C);background-size:200% 100%;animation:sk 1.2s linear infinite}@keyframes sk{to{background-position:-200% 0}}
 .tool pre{margin:8px 0 0;max-height:180px;overflow:auto;background:#071323;border-radius:10px;padding:8px;font:11px/1.45 ui-monospace,monospace;white-space:pre-wrap;word-break:break-all}
 .think{align-self:flex-start;max-width:92%;color:var(--muted);font-size:13px}
 .think summary{min-height:24px}
@@ -85,7 +86,7 @@ const $=s=>document.querySelector(s), J={'content-type':'application/json'};
 const api=(p,o={})=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),o.timeout||20000);
   return fetch(p,{...o,signal:c.signal}).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.status===204?null:r.json().catch(()=>null)}).finally(()=>clearTimeout(t))};
 const st={get:(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let S={sessions:[],models:[],model:st.get('model',null),cur:null,shown:null,msgs:[],loaded:false,busy:false,busySince:0,perms:[],qs:[],err:'',catalogAt:0,catalogError:'',fromCache:false,refreshing:false,lastProgress:0,lastEvent:0,requestError:''};
+let S={sessions:[],models:[],model:st.get('model',null),cur:null,shown:null,msgs:[],loaded:false,busy:false,busySince:0,perms:[],qs:[],err:'',catalogAt:0,catalogError:'',fromCache:false,refreshing:false,lastProgress:0,lastEvent:0,requestError:'',agent:st.get('agent','build'),msgLimit:80};
 let R={map:new Map(),raf:0,stick:true};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
@@ -226,7 +227,11 @@ function items(){
   return out}
 function syncMsgs(){
   const box=$('#msgs');if(!box)return;
-  const near=box.scrollHeight-box.scrollTop-box.clientHeight<120,its=items(),seen=new Set();let prev=null;
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<120;let its=items();
+  // Renderiza solo la ventana reciente para evitar que chats largos bloqueen WebView.
+  const total=its.length,limit=Math.max(40,Math.min(120,S.msgLimit||80));if(total>limit){its=its.slice(-limit);its.unshift({k:'older',cls:'muted sm',html:'Mostrando los últimos '+limit+' elementos de '+total+' · desplázate por el historial reciente'});}
+  if(!S.loaded&&!S.msgs.length)its=[{k:'sk1',cls:'skeleton',html:''},{k:'sk2',cls:'skeleton',html:''},{k:'sk3',cls:'skeleton',html:''}];
+  const seen=new Set();let prev=null;
   for(const it of its){seen.add(it.k);
     let e=R.map.get(it.k);if(!e){e={el:document.createElement('div'),sig:null};R.map.set(it.k,e)}
     const sig=it.cls+'|'+it.html;
@@ -274,7 +279,7 @@ async function answerQ(q,ans){S.qs=S.qs.filter(x=>x.id!==q.id);qSig=null;drawQ()
   catch(e){S.qs.push(q);qSig=null;S.requestError='No se pudo enviar la respuesta: '+String(e.message||e);paint()}}
 
 /* ---------- Vistas ---------- */
-function nav(on){return `<nav class="nav"><a href="#/" class="${on==='h'?'on':''}">${ic(I.home,20)}<span>Inicio</span></a><a href="#/sessions" class="${on==='p'?'on':''}">${ic(I.chat,20)}<span>Proyectos</span></a><a href="#/models" class="${on==='m'?'on':''}">${ic(I.star,20)}<span>Modelos</span></a><a href="/">${ic(I.cls,20)}<span>Ajustes</span></a></nav>`}
+function nav(on){return `<nav class="nav"><a href="#/" class="${on==='h'?'on':''}">${ic(I.home,20)}<span>Inicio</span></a><a href="#/sessions" class="${on==='p'?'on':''}">${ic(I.chat,20)}<span>Proyectos</span></a><a href="#/models" class="${on==='m'?'on':''}">${ic(I.star,20)}<span>Modelos</span></a><a href="#/settings" class="${on==='set'?'on':''}">${ic(I.cls,20)}<span>Ajustes</span></a></nav>`}
 function route(){
   const h=location.hash||'#/',v=$('#view');
   if(h.startsWith('#/s/')){const id=decodeURIComponent(h.slice(4));
@@ -285,6 +290,7 @@ function render(){
   const h=location.hash||'#/',v=$('#view');if(!v||S.cur)return;v.style.padding='28px 20px 110px';
   const open=e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s;
   lastSig=sessSig();
+  if(h==='#/settings'){v.innerHTML=settingsView();const up=$('#updateOC');if(up)up.onclick=()=>{if(window.OpenCodeNative&&OpenCodeNative.updateOpenCode)OpenCodeNative.updateOpenCode();else alert('Actualizador nativo no disponible en esta compilación')};return}
   if(h==='#/sessions'){v.innerHTML=sessionsView();v.querySelectorAll('[data-s]').forEach(open);const n=$('#new');if(n)n.onclick=newSession}
   else if(h==='#/models'){v.innerHTML=modelsView();const r=$('#refreshModels');if(r)r.onclick=()=>loadModels(true);v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);render()})}
   else{v.innerHTML=homeView();$('#new').onclick=newSession;v.querySelectorAll('[data-s]').forEach(open)}}
@@ -300,6 +306,7 @@ function homeView(){const m=curModel(),count=S.sessions.length;
   <a class="card tile" href="#/models"><span class="ico">${ic(I.star,23)}</span><strong>Modelos IA</strong><span>Solo gratuitos verificados</span></a></div>
   <div class="hero"><div class="row"><span style="font-size:25px">✦</span><div class="grow"><b>Empieza con una idea</b><div class="sm" style="opacity:.85">Crea un proyecto nuevo con tu modelo activo</div></div></div><button class="btn" id="new">＋ Nueva conversación</button></div>
   <h2>Recientes</h2><div class="list">${S.sessions.slice(0,4).map(sessRow).join('')||'<div class="card empty muted">Todavía no hay conversaciones. Crea una para empezar.</div>'}</div>${nav('h')}`}
+function settingsView(){return `<h1>Ajustes</h1><div class="muted sm" style="margin:6px 0 18px">Mantenimiento del entorno local</div><div class="card"><b>OpenCode instalado</b><div class="muted sm" style="margin:6px 0 14px">Actualiza el binario oficial sin borrar proyectos ni sesiones. El servidor se detendrá temporalmente.</div><button class="btn p" id="updateOC">Actualizar OpenCode</button></div><div class="card" style="margin-top:12px"><b>Privacidad y archivos</b><div class="muted sm" style="margin-top:6px">El acceso a /sdcard depende de los permisos y carpetas que Android permita montar.</div></div>${nav('set')}`}
 function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new" aria-label="Nueva">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 18px">Conversaciones y trabajos recientes</div><div class="list">${S.sessions.map(sessRow).join('')||'<div class="card empty muted">No hay proyectos todavía.</div>'}</div>${nav('p')}`}
 function modelsView(){
   const sel=m=>curModel()&&curModel().p===m.p&&curModel().id===m.id;
@@ -316,18 +323,21 @@ function modelsView(){
 /* ---------- Chat ---------- */
 function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel();
   return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" id="ttl" style="font-size:16px;font-weight:700">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
-  <div id="msgs"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div>
+  <div class="chattools"><button id="agentMode">${S.agent==='plan'?'Plan':'Build'} ▾</button><select id="chatModel" aria-label="Modelo del chat"><option value="">Modelo actual</option>${S.models.map(x=>`<option value="${esc(x.p)}|${esc(x.id)}" ${S.model&&S.model.p===x.p&&S.model.id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select><button id="compact">/compact</button><button id="undo">/undo</button><button id="showDiff">Diff</button></div><div id="msgs"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div>
   <div class="comp"><textarea id="inp" rows="1" placeholder="Escribe un mensaje…"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button></div></div>`}
 async function send(){
   const i=$('#inp');if(!i)return;
   if(S.busy){try{await api('/session/'+S.cur+'/abort',{method:'POST'})}catch(e){}setBusy(false);scheduleLoad(300);return}
   const t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';
-  const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};
+  if(t==='/undo'){try{await api('/session/'+S.cur+'/undo',{method:'POST',headers:J,body:'{}'});scheduleLoad(150)}catch(e){S.requestError='No se pudo deshacer: '+String(e.message||e);paint()}return}
+  if(t==='/compact'){try{await api('/session/'+S.cur+'/summarize',{method:'POST',headers:J,body:'{}'});scheduleLoad(200)}catch(e){S.requestError='No se pudo compactar: '+String(e.message||e);paint()}return}
+  const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};b.agent=S.agent;
   S.requestError='';setBusy(true);
   S.msgs.push({info:{role:'user',sessionID:S.cur},parts:[{type:'text',text:t}]});R.stick=true;paint();
   try{await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)});scheduleLoad(900)}
   catch(e){const k=S.msgs.findIndex(m=>m.info&&!m.info.id&&m.info.role==='user');if(k>=0)S.msgs.splice(k,1);
     setBusy(false);S.requestError='No se pudo enviar el mensaje: '+String(e.message||e);const x=$('#inp');if(x&&!x.value)x.value=t;paint()}}
+async function showDiff(){try{const d=await api('/session/'+S.cur+'/diff');const files=Array.isArray(d)?d:[];const html=files.map(f=>{const lines=String(f.diff||'').split('\n').map(line=>`<span class="${line.startsWith('+')?'add':line.startsWith('-')?'del':''}">${esc(line)}</span>`).join('');return `<div class="card" style="margin:8px 0"><b>${esc(f.file||f.path||'Archivo')}</b><div class="diff">${lines||'Sin diferencias disponibles'}</div></div>`}).join('')||'<div class="muted">OpenCode no devolvió diferencias para esta sesión.</div>';const dlog=document.createElement('div');dlog.className='modal';dlog.innerHTML=`<div class="card" style="max-height:82dvh;overflow:auto;width:min(94vw,560px)"><div class="row sp"><b>Diff de la sesión</b><button class="rb" id="closeDiff">×</button></div><div style="margin-top:12px">${html}</div><div class="muted sm" style="margin-top:10px">Para revertir un cambio usa /undo, que revierte el último mensaje de la sesión. La reversión por archivo aún no está disponible.</div></div>`;document.body.appendChild(dlog);dlog.querySelector('#closeDiff').onclick=()=>dlog.remove()}catch(e){S.requestError='No se pudieron cargar los diffs: '+String(e.message||e);paint()}}
 function bindChat(){
   R={map:new Map(),raf:0,stick:true};permSig=null;qSig=null;
   $('#bk').onclick=()=>{location.hash='#/'};
@@ -336,6 +346,11 @@ function bindChat(){
   i.oninput=()=>{i.style.height='auto';i.style.height=Math.min(i.scrollHeight,120)+'px'};
   i.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!coarse&&!e.isComposing){e.preventDefault();send()}};
   $('#go').onclick=send;
+  const am=$('#agentMode');if(am)am.onclick=()=>{S.agent=S.agent==='plan'?'build':'plan';st.set('agent',S.agent);am.textContent=(S.agent==='plan'?'Plan':'Build')+' ▾'};
+  const cm=$('#chatModel');if(cm)cm.onchange=()=>{const [p,id]=cm.value.split('|');if(p&&id){S.model={p,id};st.set('model',S.model);const label=document.querySelector('.top .muted');if(label)label.textContent=(S.models.find(x=>x.p===p&&x.id===id)||{}).name||id}};
+  const df=$('#showDiff');if(df)df.onclick=showDiff;
+  const un=$('#undo');if(un)un.onclick=async()=>{try{await api('/session/'+S.cur+'/undo',{method:'POST',headers:J,body:'{}'});scheduleLoad(150)}catch(e){S.requestError='Undo no disponible: '+String(e.message||e);paint()}};
+  const co=$('#compact');if(co)co.onclick=async()=>{try{await api('/session/'+S.cur+'/summarize',{method:'POST',headers:J,body:'{}'});scheduleLoad(200)}catch(e){S.requestError='Compactación no disponible: '+String(e.message||e);paint()}};
   $('#down').onclick=()=>{box.scrollTop=box.scrollHeight};
   box.onscroll=()=>{const d=$('#down');if(d)d.classList.toggle('hide',box.scrollHeight-box.scrollTop-box.clientHeight<200)};
   box.onclick=e=>{const c=e.target.closest('.cp');
@@ -356,8 +371,8 @@ function ev(e){let d;try{d=JSON.parse(e.data)}catch(x){return}
     permSig=null;drawPerm();return}
   if(t==='question.asked'){const n=normQ(p);if(n&&!S.qs.some(x=>x.id===n.id))S.qs.push(n);qSig=null;drawQ();paint();return}
   if(t==='question.replied'||t==='question.rejected'){const id=p.requestID||p.id;S.qs=S.qs.filter(x=>x.id!==id);qSig=null;drawQ();paint();return}
-  if(t==='session.status'){if(p.sessionID===S.cur){const k=p.status&&p.status.type;if(k==='busy'||k==='retry')setBusy(true);else if(k==='idle'){setBusy(false);scheduleLoad(150)}}return}
-  if(t==='session.idle'){if(p.sessionID===S.cur){setBusy(false);scheduleLoad(150)}return}
+  if(t==='session.status'){if(p.sessionID===S.cur){const k=p.status&&p.status.type;if(k==='busy'||k==='retry')setBusy(true);else if(k==='idle'){const was=S.busy;setBusy(false);scheduleLoad(150);if(was&&window.OpenCodeNative&&OpenCodeNative.taskFinished)OpenCodeNative.taskFinished((document.querySelector('#ttl')||{}).textContent||'Tarea completada')}}return}
+  if(t==='session.idle'){if(p.sessionID===S.cur){const was=S.busy;setBusy(false);scheduleLoad(150);if(was&&window.OpenCodeNative&&OpenCodeNative.taskFinished)OpenCodeNative.taskFinished((document.querySelector('#ttl')||{}).textContent||'Tarea completada')}return}
   if(t==='session.error'){if(!p.sessionID||p.sessionID===S.cur){S.requestError=errText(p.error)||'OpenCode notificó un error durante la generación.';setBusy(false)}return}
   if(t==='message.updated'){const i=p.info;if(S.cur&&i&&i.sessionID===S.cur){upsertMsg(i);paint()}return}
   if(t==='message.part.updated'){const q=p.part;if(S.cur&&q&&q.sessionID===S.cur){upsertPart(q);S.lastProgress=Date.now();paint()}return}

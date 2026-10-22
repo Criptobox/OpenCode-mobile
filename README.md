@@ -69,3 +69,34 @@ Parte de la base 0.3.2 con una pantalla de error de emergencia para fallos JavaS
 - Corregido: las tarjetas de permiso no se cerraban tras responder (bug de 0.5.0).
 
 Código fuente sin compilar ni probar en dispositivo: compílalo con GitHub Actions como siempre.
+
+
+## 0.6.1 — corrección de conversaciones largas
+
+Se corrigió el contenedor flex del chat: el panel de mensajes puede reducirse dentro de la pantalla, pero cada burbuja, herramienta y bloque de razonamiento conserva su altura natural (`flex-shrink: 0`). Esto evita que, al acumularse muchos mensajes/herramientas, el navegador comprima verticalmente los elementos y recorte el texto.
+
+
+## OpenCode Mobile 0.7.0 — mejoras experimentales
+
+- Barra del chat con selector de modelo gratuito, modo Plan/Build, `/undo` y `/compact`.
+- Ventana de renderizado limitada a los últimos elementos para reducir trabajo del WebView en conversaciones largas.
+- Esqueletos visuales mientras carga el historial.
+- Resaltado verde/rojo de líneas de salida que parecen un diff dentro de las herramientas.
+
+**Importante:** estos cambios son código fuente experimental. Las rutas `/session/{id}/undo` y `/session/{id}/summarize`, el campo `agent` y el selector de modelo deben verificarse contra la versión de OpenCode que se instala en el dispositivo. El renderizado limitado mejora el rendimiento, pero en esta versión no implementa paginación hacia mensajes antiguos. El resaltado de diff depende de que la herramienta entregue texto en formato diff; todavía no existe una reversión por archivo. La actualización del binario, la acción Detener en notificaciones y el montaje seguro de `/sdcard` no se han implementado en esta entrega y requieren cambios adicionales en el servicio Android/PRoot y pruebas en dispositivo.
+
+
+## OpenCode Mobile 0.8.0 — mantenimiento y acceso al almacenamiento
+- La notificación persistente del servidor incorpora la acción «Detener servidor». Esto detiene el proceso de OpenCode sin borrar el entorno instalado. Al volver a abrir la app, el servicio puede iniciarse de nuevo.
+- PRoot intenta montar el almacenamiento compartido de Android como `/sdcard` si la ruta del sistema es accesible. El acceso efectivo depende de los permisos y restricciones de almacenamiento del dispositivo; esta entrega no garantiza acceso universal a todas las carpetas.
+- Esta versión no implementa todavía el actualizador integrado del binario, la notificación de fin de tarea con cancelación de esa tarea, ni la reversión individual de diffs. Se dejan como siguientes pasos para no presentarlos como funciones terminadas.
+- Validación de esta entrega: revisión estática y empaquetado del código fuente. No se ha compilado ni probado en un dispositivo Android.
+
+## 0.8.1 — mantenimiento, notificaciones y diffs
+
+- Añade en Ajustes un actualizador del binario OpenCode basado en el registro oficial de npm para `opencode-linux-arm64-musl`. Descarga el paquete, verifica `dist.integrity`/`shasum` cuando está publicado, prueba el binario antes de sustituir el anterior y conserva proyectos/sesiones en el rootfs.
+- Añade aviso Android cuando la sesión activa pasa de generación a inactiva. El botón de la notificación permite detener el servidor.
+- Añade un visor básico de diffs por sesión con líneas añadidas/eliminadas coloreadas. Para revertir cambios se conserva `/undo` (revierte el último mensaje de la sesión); la reversión granular por archivo no se incluye aún.
+- Se mantiene el montaje de almacenamiento compartido `/storage/emulated/0` como `/sdcard` dentro de PRoot cuando Android permite leerlo.
+
+Validación de esta entrega: comprobación de sintaxis JavaScript y estructura ZIP. No se dispone de Gradle instalado ni se ha compilado/probado el APK en un dispositivo; el actualizador y las notificaciones requieren validación real en Android antes de considerarse verificados.

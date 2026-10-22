@@ -19,6 +19,8 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.ConsoleMessage
 import android.webkit.HttpAuthHandler
+import android.webkit.JavascriptInterface
+import android.widget.Toast
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -181,6 +183,20 @@ class MainActivity : Activity() {
                 return true
             }
         }
+        addJavascriptInterface(object {
+            @JavascriptInterface fun taskFinished(title: String) { ui.post { RuntimeService.notifyTaskFinished(this@MainActivity, title.take(100)) } }
+            @JavascriptInterface fun updateOpenCode() {
+                Thread {
+                    try {
+                        RuntimeService.stopForUpdate(this@MainActivity)
+                        rt.updateOpenCode { msg -> ui.post { Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show() } }
+                        ui.post { Toast.makeText(this@MainActivity, "Actualización lista; reiniciando servidor…", Toast.LENGTH_LONG).show(); startService(Intent(this@MainActivity, RuntimeService::class.java)); web.reload() }
+                    } catch (e: Exception) {
+                        ui.post { Toast.makeText(this@MainActivity, "No se pudo actualizar: ${e.message ?: "error"}", Toast.LENGTH_LONG).show(); startService(Intent(this@MainActivity, RuntimeService::class.java)) }
+                    }
+                }.start()
+            }
+        }, "OpenCodeNative")
         webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
                 val u = request.url

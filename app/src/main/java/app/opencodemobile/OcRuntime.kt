@@ -64,12 +64,19 @@ class OcRuntime(private val ctx: Context) {
         }
     }
 
-    private fun guestCmd(script: String, extraEnv: List<String> = emptyList()) = listOf(
-        "$nativeDir/libproot.so", "-0", "--link2symlink", "--kill-on-exit",
-        "-r", root.path, "-b", "/dev", "-b", "/proc", "-b", "/sys", "-w", "/root",
-        "/usr/bin/env", "-i", "HOME=/root", "TERM=xterm-256color", "LANG=C.UTF-8",
-        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-    ) + extraEnv + listOf("/bin/sh", "-c", script)
+    private fun guestCmd(script: String, extraEnv: List<String> = emptyList()): List<String> {
+        val args = mutableListOf(
+            "$nativeDir/libproot.so", "-0", "--link2symlink", "--kill-on-exit",
+            "-r", root.path, "-b", "/dev", "-b", "/proc", "-b", "/sys"
+        )
+        // Android's shared storage is exposed only when the OS grants access. The app's private
+        // runtime remains usable if the shared-storage path is absent.
+        val shared = File("/storage/emulated/0")
+        if (shared.exists() && shared.canRead()) { args += listOf("-b", "${shared.path}:/sdcard") }
+        args += listOf("-w", "/root", "/usr/bin/env", "-i", "HOME=/root", "TERM=xterm-256color", "LANG=C.UTF-8",
+        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
+        return args + extraEnv + listOf("/bin/sh", "-c", script)
+    }
 
     private fun run(script: String, onLine: (String) -> Unit): Int {
         val pb = ProcessBuilder(guestCmd(script)).redirectErrorStream(true)
@@ -263,6 +270,51 @@ class OcRuntime(private val ctx: Context) {
             stageBin.writeText("ok")
         }
         onProgress(1000, "Listo")
+    }
+
+    /** Actualiza solo el binario de OpenCode; conserva rootfs, proyectos, ajustes y sesiones. */
+    fun updateOpenCode(onProgress: (String) -> Unit = {}) {
+        prepareLibs()
+        onProgress("Consultando versión oficial…")
+        val meta = JSONObject(retry { httpText("https://registry.npmjs.org/opencode-linux-arm64-musl/latest") })
+        val version = meta.getString("version")
+        if (version == installedVersion()) { onProgress("OpenCode ya está actualizado ($version)"); return }
+        val dist = meta.getJSONObject("dist")
+        val tarball = dist.getString("tarball")
+        val integrity = dist.optString("integrity")
+        val shasum = dist.optString("shasum")
+        val verify: ((File) -> Boolean)? = when {
+            integrity.startsWith("sha512-") -> sha512Check(integrity.removePrefix("sha512-"))
+            shasum.length == 40 -> sha1Check(shasum)
+            else -> null
+        }
+        val tgz = File(dl, "opencode-update-$version.tgz")
+        tgz.delete()
+        onProgress("Descargando OpenCode $version…")
+        download(tarball, tgz, { d, t -> if (t > 0) onProgress("Descargando $version · ${mb(d)} / ${mb(t)} MB") }, verify)
+        val tmp = File(tmpDir, "oc-update-$version")
+        tmp.deleteRecursively()
+        onProgress("Verificando y preparando actualización…")
+        untar(tgz, tmp)
+        val candidate = File(tmp, "package/bin/opencode").takeIf { it.exists() }
+            ?: tmp.walkTopDown().firstOrNull { it.isFile && it.name == "opencode" && it.length() > 1_000_000 }
+            ?: error("No se encontró el binario en el paquete oficial")
+        val target = File(root, "usr/local/bin/opencode")
+        val staged = File(target.parentFile, "opencode.new")
+        target.parentFile?.mkdirs()
+        candidate.copyTo(staged, overwrite = true)
+        staged.setExecutable(true, false)
+        val check = ProcessBuilder(guestCmd("/usr/local/bin/opencode --version")).redirectErrorStream(true).apply { environment().putAll(env()) }.start()
+        val output = check.inputStream.bufferedReader().use { it.readText() }.trim()
+        if (check.waitFor() != 0 || output.isBlank()) { staged.delete(); error("La versión descargada no supera la prueba de arranque") }
+        val backup = File(target.parentFile, "opencode.previous")
+        backup.delete(); if (target.exists() && !target.renameTo(backup)) error("No se pudo respaldar el binario actual")
+        if (!staged.renameTo(target)) { if (backup.exists()) backup.renameTo(target); error("No se pudo activar la actualización") }
+        target.setExecutable(true, false)
+        File(ctx.filesDir, "opencode.version").writeText(version)
+        stageBin.writeText("ok")
+        backup.delete(); tgz.delete(); tmp.deleteRecursively()
+        onProgress("Actualizado correctamente a $version")
     }
 
     fun installedVersion(): String = try { File(ctx.filesDir, "opencode.version").readText().trim() } catch (e: Exception) { "" }
