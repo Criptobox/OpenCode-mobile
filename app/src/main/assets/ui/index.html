@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050D1A">
 <title>OpenCode</title>
 <style>
  :root{color-scheme:dark;--bg:#050D1A;--card:#101F34;--text:#F5F7FF;--muted:#9FB0C8;--acc:#6554FF;--soft:#182B47;--sofft:#BFC5FF;--mint:#123D37;--mintt:#64F0BB;--amber:#3B2D18;--ambert:#FFD18A;--nav:#081426;--sh:0 8px 26px rgba(0,0,0,.25);--del:#421F2D;--delt:#FFB3C0}
@@ -34,45 +35,41 @@ h2{font-size:17px;margin:24px 0 12px}.list{display:flex;flex-direction:column;ga
 .opt{display:flex;align-items:center;gap:12px;border:1px solid #263D5C}.opt.sel{border-color:#786AFF;background:#17264A}.dot{width:24px;height:24px;border-radius:12px;border:2px solid #8196B3;flex:none;display:flex;align-items:center;justify-content:center;color:#fff}.opt.sel .dot{background:var(--acc);border-color:var(--acc)}
 .note{background:#192A43;color:#C4D4EC;border:1px solid #293E5C;border-radius:18px;padding:12px 14px;font-size:13px;margin-top:16px}.empty{text-align:center;padding:30px 10px}
 .brandmark{width:54px;height:54px;border-radius:19px;background:linear-gradient(135deg,#7458FF,#396EFF);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px #554bff55}.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tile{min-height:128px;text-decoration:none;color:var(--text);display:flex;flex-direction:column;align-items:flex-start;gap:9px}.tile .ico{width:42px;height:42px}.tile strong{font-size:15px}.tile span:last-child{font-size:12px;color:var(--muted);line-height:1.35}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:400 15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-#view{height:100dvh;overflow-y:auto;padding:28px 20px 110px}
-h1{font-size:28px;line-height:1.15;margin:4px 0 0;font-weight:700}
-.muted{color:var(--muted)}.sm{font-size:13px}.row{display:flex;align-items:center;gap:12px}.sp{justify-content:space-between}
-.badge{font:600 11px system-ui;padding:5px 10px;border-radius:999px;white-space:nowrap;background:var(--soft);color:var(--sofft)}
-.badge.g{background:var(--mint);color:var(--mintt)}.badge.a{background:var(--amber);color:var(--ambert)}
-.card{background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--sh)}
-.hero{background:var(--acc);color:#fff;border-radius:28px;padding:22px;margin-top:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 24px rgba(91,91,214,.28)}
-.hero .badge{background:rgba(255,255,255,.22);color:#fff}
-.btn{min-height:50px;border:0;border-radius:18px;font:700 15px system-ui;background:#fff;color:#3F3FB8;width:100%}
-.btn.p{background:var(--acc);color:#fff}.btn.s{background:var(--card);color:var(--text)}
-h2{font-size:18px;margin:26px 0 12px}
-.list{display:flex;flex-direction:column;gap:12px}
-.ico{width:44px;height:44px;border-radius:14px;background:var(--soft);color:var(--sofft);display:flex;align-items:center;justify-content:center;flex:none}
-.grow{flex:1;min-width:0}.t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav{position:fixed;left:20px;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));height:68px;border-radius:34px;background:var(--nav);display:flex;justify-content:space-around;align-items:center;padding:0 8px;z-index:5}
-.nav a{display:flex;align-items:center;gap:8px;color:#AEB4C0;text-decoration:none;font:600 13px system-ui;min-height:48px;padding:0 14px;border-radius:24px}
-.nav a.on{background:var(--acc);color:#fff}
-.chat{display:flex;flex-direction:column;height:100dvh}
-.top{padding:20px 16px 10px;display:flex;align-items:center;gap:10px}
-.rb{width:44px;height:44px;border:0;border-radius:22px;background:var(--card);color:var(--text);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;flex:none}
-#msgs{flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px}
-.b{max-width:86%;padding:12px 16px;border-radius:22px;word-wrap:break-word;overflow-wrap:anywhere}
-.b.u{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:6px}
-.b.a{background:var(--card);box-shadow:var(--sh);border-bottom-left-radius:6px}
-.b pre{background:var(--bg);border-radius:12px;padding:10px;overflow-x:auto;font:12px/1.5 ui-monospace,monospace;margin:8px 0;white-space:pre}
-.b code{font:12px ui-monospace,monospace;background:var(--bg);padding:1px 5px;border-radius:6px}
-.tool{background:var(--soft);color:var(--sofft);border-radius:14px;padding:9px 14px;font:500 12px ui-monospace,monospace;align-self:flex-start;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.perm{margin:0 16px 8px;background:var(--amber);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.perm b{color:var(--ambert)}.perm .c{background:var(--card);border-radius:12px;padding:8px 12px;font:12px ui-monospace,monospace;overflow-wrap:anywhere}
-.comp{margin:6px 16px calc(16px + env(safe-area-inset-bottom));background:var(--card);border-radius:30px;box-shadow:var(--sh);display:flex;align-items:flex-end;gap:8px;padding:8px}
-.comp textarea{flex:1;border:0;outline:0;background:none;color:var(--text);font:15px/1.4 system-ui;resize:none;max-height:120px;padding:10px 6px}
-.send{width:44px;height:44px;border:0;border-radius:22px;background:var(--acc);color:#fff;flex:none;display:flex;align-items:center;justify-content:center}
-.opt{display:flex;align-items:center;gap:12px;border:2px solid transparent}.opt.sel{border-color:var(--acc)}
-.dot{width:24px;height:24px;border-radius:12px;border:2px solid #9AA3B2;flex:none;display:flex;align-items:center;justify-content:center;color:#fff}
-.opt.sel .dot{background:var(--acc);border-color:var(--acc)}
-.note{background:var(--amber);color:var(--ambert);border-radius:18px;padding:12px 14px;font-size:13px;margin-top:16px}
-.empty{text-align:center;padding:30px 10px}
+html,body{margin:0;height:100%;overflow:hidden}
+.chat{position:relative}
+#msgs{overscroll-behavior:contain}
+.b{overflow:hidden}
+.b p{margin:0 0 6px}.b p:last-child,.b>*:last-child{margin-bottom:0}
+.b h4{margin:10px 0 6px;font-size:15px}
+.b ul,.b ol{margin:4px 0 8px;padding-left:22px}.b li{margin:2px 0}
+.b a{color:#9DB4FF}
+.b blockquote{margin:6px 0;padding:2px 10px;border-left:3px solid #35507A;color:var(--muted)}
+.b.u a{color:#fff;text-decoration:underline}
+.cb{margin:8px 0;border-radius:12px;overflow:hidden;background:#071323}
+.ch{display:flex;justify-content:space-between;align-items:center;padding:0 4px 0 12px;font:600 11px system-ui;color:var(--muted);background:#0B1B31}
+.cp{border:0;background:none;color:#B9B4FF;font:600 11px system-ui;padding:0 10px;min-height:34px}
+.cb pre{margin:0!important;border-radius:0!important;background:none!important}
+.tool{white-space:normal;text-overflow:clip;max-width:100%}
+.tool summary{list-style:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:20px}
+.tool summary::-webkit-details-marker{display:none}
+.tool pre{margin:8px 0 0;max-height:180px;overflow:auto;background:#071323;border-radius:10px;padding:8px;font:11px/1.45 ui-monospace,monospace;white-space:pre-wrap;word-break:break-all}
+.think{align-self:flex-start;max-width:92%;color:var(--muted);font-size:13px}
+.think summary{min-height:24px}
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
+.modal .card{width:100%;max-width:360px}.modal p{margin:4px 0 16px;font-size:16px}
+.modal .row .btn{flex:1;width:auto}
+.perm .btn{font-size:13px;padding:0 6px}
+.down{position:absolute;right:18px;bottom:92px;width:40px;height:40px;border:1px solid #243B5B;border-radius:20px;background:#12233A;color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);z-index:4}
+.hide{display:none!important}
+#qst{max-height:55dvh;overflow-y:auto}
+.qcard{margin:0 16px 8px;background:#14284A;border:1px solid #2B4A7E;border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:12px}.qcard>b{color:#B9CCFF}
+.qh{font:700 11px system-ui;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{border:1px solid #2F4C7C;background:#102039;color:var(--text);border-radius:14px;padding:8px 12px;font:600 13px system-ui;text-align:left;min-height:40px}
+.chip small{display:block;font:400 11px system-ui;color:var(--muted);margin-top:2px}.chip.on{background:var(--acc);border-color:var(--acc)}.chip.on small{color:#e6e6ff}
+.qin{width:100%;margin-top:8px;min-height:42px;border-radius:12px;border:1px solid #2F4C7C;background:#0B1A30;color:var(--text);padding:0 12px;font:14px system-ui;outline:0}
+.qcard .row .btn{flex:1;width:auto}
+@media (prefers-reduced-motion:no-preference){.b,.tool,.think{animation:in .15s ease-out}@keyframes in{from{opacity:0;transform:translateY(4px)}}}
 </style></head><body>
 <div id="view"></div>
 <script>
@@ -85,95 +82,228 @@ window.addEventListener('unhandledrejection',function(e){
 </script>
 <script>
 const $=s=>document.querySelector(s), J={'content-type':'application/json'};
-const api=(p,o)=>fetch(p,o).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.status===204?null:r.json().catch(()=>null)});
+const api=(p,o={})=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),o.timeout||20000);
+  return fetch(p,{...o,signal:c.signal}).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.status===204?null:r.json().catch(()=>null)}).finally(()=>clearTimeout(t))};
 const st={get:(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let S={sessions:[],models:[],model:st.get('model',null),cur:null,msgs:[],busy:false,perm:null,err:'',catalogAt:0,catalogError:'',refreshing:false,requestStarted:0,lastProgress:0,requestError:'',lastAssistantText:''};
-const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S={sessions:[],models:[],model:st.get('model',null),cur:null,shown:null,msgs:[],loaded:false,busy:false,busySince:0,perms:[],qs:[],err:'',catalogAt:0,catalogError:'',fromCache:false,refreshing:false,lastProgress:0,lastEvent:0,requestError:''};
+let R={map:new Map(),raf:0,stick:true};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10'};
-function md(s){s=esc(s);s=s.replace(/```[\w-]*\n?([\s\S]*?)```/g,(_,c)=>'<pre>'+c+'</pre>');s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');return s.split(/(<pre>[\s\S]*?<\/pre>)/).map(x=>x.startsWith('<pre>')?x:x.replace(/\n/g,'<br>')).join('')}
+const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10',down:'M12 5v14M6 13l6 6 6-6'};
+const errText=e=>e?String((e.data&&e.data.message)||e.message||e.name||''):'';
+
+/* ---------- Markdown ligero (código protegido, sin HTML crudo) ---------- */
+function codeHtml(b){return '<div class="cb"><div class="ch"><span>'+esc(b.lang||'código')+'</span><button class="cp" type="button">Copiar</button></div><pre>'+esc(b.code)+'</pre></div>'}
+function inline(t){return t.split(/(`[^`\n]+`)/).map((x,i)=>{
+  if(i%2)return '<code>'+esc(x.slice(1,-1))+'</code>';
+  x=esc(x).replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,'$1<i>$2</i>').replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2">$1</a>');
+  return x}).join('')}
+function md(src){
+  const blocks=[];
+  const s=String(src==null?'':src).replace(/```([\w+#.-]*)[ \t]*\n?([\s\S]*?)(```|$)/g,(_,lang,code)=>{blocks.push({lang,code:code.replace(/\n$/,'')});return '\n\u0000'+(blocks.length-1)+'\u0000\n'});
+  const out=[];let list=null;const close=()=>{if(list){out.push('</'+list+'>');list=null}};
+  for(const line of s.split('\n')){let m;
+    if(m=line.match(/^\u0000(\d+)\u0000$/)){close();out.push(codeHtml(blocks[+m[1]]));continue}
+    if(m=line.match(/^#{1,4}\s+(.*)$/)){close();out.push('<h4>'+inline(m[1])+'</h4>');continue}
+    if(m=line.match(/^\s*[-*]\s+(.*)$/)){if(list!=='ul'){close();out.push('<ul>');list='ul'}out.push('<li>'+inline(m[1])+'</li>');continue}
+    if(m=line.match(/^\s*\d+[.)]\s+(.*)$/)){if(list!=='ol'){close();out.push('<ol>');list='ol'}out.push('<li>'+inline(m[1])+'</li>');continue}
+    if(m=line.match(/^>\s?(.*)$/)){close();out.push('<blockquote>'+inline(m[1])+'</blockquote>');continue}
+    close();if(line.trim())out.push('<p>'+inline(line)+'</p>')}
+  close();return out.join('')}
+const mdc=p=>{if(p._t!==p.text){p._t=p.text;p._h=md(p.text||'')}return p._h};
 function ago(t){const s=(Date.now()-t)/1000;if(s<60)return'ahora';if(s<3600)return'hace '+Math.floor(s/60)+' min';if(s<86400)return'hace '+Math.floor(s/3600)+' h';return'hace '+Math.floor(s/86400)+' d'}
 const curModel=()=>S.models.find(m=>S.model&&m.p===S.model.p&&m.id===S.model.id);
+function ask(msg,ok){return new Promise(res=>{const d=document.createElement('div');d.className='modal';
+  d.innerHTML='<div class="card"><p>'+esc(msg)+'</p><div class="row"><button class="btn s" data-v="0">Cancelar</button><button class="btn p" data-v="1">'+esc(ok||'Aceptar')+'</button></div></div>';
+  d.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!=null||e.target===d){d.remove();res(v==='1')}};document.body.appendChild(d)})}
 
+/* ---------- Modelos (catálogo oficial + precio 0; caché 24 h si no hay red) ---------- */
 async function loadModels(manual=false){
   if(S.refreshing)return;S.refreshing=true;S.catalogError='';
-  if(manual){S.err='Actualizando catálogo oficial…';route()}
+  if(manual)render();
   try{
-    // Current provider config gives the effective per-token prices used by this OpenCode instance.
     const r=await api('/config/providers'),ps=Array.isArray(r.providers)?r.providers:Object.values(r.providers||{}),configured=[];
     for(const p of ps){
       const pid=String(p.id||'').toLowerCase(),pn=String(p.name||p.id||'');
-      // Only OpenCode Zen models are shown in the zero-cost list; unrelated BYOK providers are excluded.
       if(!(pid.includes('opencode')||pid==='zen'||pn.toLowerCase().includes('opencode zen')))continue;
       const ms=p.models||{};
       for(const id in ms){const m=ms[id],c=m.cost||{};
         const costs=[c.input,c.output,(c.cache_read??(c.cache&&c.cache.read)),(c.cache_write??(c.cache&&c.cache.write))];
         const known=costs.every(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v)));
-        const zero=known&&costs.every(v=>Number(v)===0);
-        configured.push({p:p.id,pn:p.name||p.id,id:m.id||id,name:m.name||id,free:zero,priceKnown:known,sourceVerified:false});
+        configured.push({p:p.id,pn:p.name||p.id,id:m.id||id,name:m.name||id,free:known&&costs.every(v=>Number(v)===0),priceKnown:known,sourceVerified:false});
       }
     }
-    // Verify existence against OpenCode's official Zen model endpoint. Fail closed if it cannot be checked.
     const official=await fetch('/m/zen-models',{cache:'no-store'}).then(async x=>{if(!x.ok)throw new Error('HTTP '+x.status);return x.json()});
     if(official.error)throw new Error(official.message||'Catálogo oficial no disponible');
     const raw=Array.isArray(official)?official:(official.data||official.models||[]);
     const ids=new Set(raw.map(x=>String(typeof x==='string'?x:(x.id||x.name||''))).filter(Boolean));
     if(!ids.size)throw new Error('La fuente oficial no devolvió modelos reconocibles');
-    // Require both official catalogue presence and explicit zero pricing from OpenCode config.
     S.models=configured.filter(m=>ids.has(m.id)&&m.free).map(m=>({...m,sourceVerified:true}));
     S.models.sort((a,b)=>a.name.localeCompare(b.name));
-    S.catalogAt=Date.now();
-    if(!S.models.some(m=>S.model&&m.p===S.model.p&&m.id===S.model.id)){
-      const f=S.models[0];S.model=f?{p:f.p,id:f.id}:null;st.set('model',S.model);
-    }
+    S.catalogAt=Date.now();S.fromCache=false;st.set('zenCache',{at:S.catalogAt,models:S.models});
+    if(!S.models.some(m=>S.model&&m.p===S.model.p&&m.id===S.model.id)){const f=S.models[0];S.model=f?{p:f.p,id:f.id}:null;st.set('model',S.model)}
     if(!S.models.length)S.catalogError='No hay modelos que cumplan todas las verificaciones. No se mostrarán modelos de precio desconocido o distinto de $0.';
     S.err='';
   }catch(e){
-    S.models=[];S.catalogError='No se pudo verificar el catálogo oficial y el precio. Conexión: '+String(e.message||e)+'. Por seguridad no se mostrarán modelos como gratuitos.';
-    S.err='No se pudo verificar el catálogo gratuito';
-  }finally{S.refreshing=false;if(location.hash==='#/models'||manual)route()}
-}
-async function loadSessions(){const r=await api('/session');S.sessions=(r||[]).sort((a,b)=>((b.time||{}).updated||0)-((a.time||{}).updated||0))}
-async function loadMsgs(){
-  if(!S.cur)return;
-  try{
-    const fresh=await api('/session/'+S.cur+'/message');
-    if(!Array.isArray(fresh))throw new Error('Respuesta de mensajes no válida');
-    S.msgs=fresh;
-    const assistants=fresh.filter(m=>m&&m.info&&m.info.role==='assistant');
-    const last=assistants[assistants.length-1];
-    const completed=!!(last&&last.info&&last.info.time&&last.info.time.completed);
-    const latestText=last&&Array.isArray(last.parts)?last.parts.filter(p=>p.type==='text').map(p=>p.text||'').join(''):'';
-    if(latestText!==S.lastAssistantText){S.lastAssistantText=latestText;S.lastProgress=Date.now()}
-    if(S.busy&&last&&completed){S.busy=false;S.requestError='';S.requestStarted=0}
-    drawMsgs();
-  }catch(e){S.requestError='No se pudo actualizar la respuesta: '+String(e.message||e);drawMsgs()}
+    const c=st.get('zenCache',null);
+    if(c&&Array.isArray(c.models)&&c.models.length&&Date.now()-c.at<864e5){
+      S.models=c.models;S.catalogAt=c.at;S.fromCache=true;S.err='';
+      S.catalogError='Sin conexión con el catálogo oficial. Se muestra la última verificación ('+new Date(c.at).toLocaleString()+', válida 24 h).';
+    }else{
+      S.models=[];S.catalogError='No se pudo verificar el catálogo oficial y el precio. Conexión: '+String(e.message||e)+'. Por seguridad no se mostrarán modelos como gratuitos.';
+      S.err='No se pudo verificar el catálogo gratuito';
+    }
+  }finally{S.refreshing=false;if(!S.cur&&(manual||location.hash==='#/models'||location.hash===''||location.hash==='#/'))render()}
 }
 
+/* ---------- Sesiones ---------- */
+async function loadSessions(){const r=await api('/session');S.sessions=(r||[]).sort((a,b)=>((b.time||{}).updated||0)-((a.time||{}).updated||0))}
+const sessSig=()=>S.sessions.map(s=>s.id+'|'+(s.title||'')+'|'+((s.time||{}).updated||0)).join(',');
+let lastSig='';
+async function refreshSessions(){try{await loadSessions()}catch(e){return}if(S.cur)return;const g=sessSig();if(g!==lastSig){lastSig=g;render()}}
+function upsertSession(i){const k=S.sessions.findIndex(x=>x.id===i.id);if(k>=0)S.sessions[k]=i;else S.sessions.unshift(i);S.sessions.sort((a,b)=>((b.time||{}).updated||0)-((a.time||{}).updated||0))}
+async function newSession(){try{const s=await api('/session',{method:'POST',headers:J,body:'{}'});upsertSession(s);location.hash='#/s/'+s.id}catch(e){S.err='No se pudo crear la sesión';render()}}
+
+/* ---------- Mensajes: carga completa + actualización incremental por SSE ---------- */
+let loading=false,again=false,loadT=0;
+function scheduleLoad(ms){clearTimeout(loadT);loadT=setTimeout(loadMsgs,ms||300)}
+function setBusy(v){if(v&&!S.busy){S.busy=true;S.busySince=Date.now();S.lastProgress=Date.now()}else if(!v){S.busy=false;S.busySince=0}paint()}
+async function loadMsgs(){
+  const id=S.cur;if(!id)return;if(loading){again=true;return}loading=true;
+  try{
+    const fresh=await api('/session/'+id+'/message');
+    if(S.cur!==id)return;
+    if(!Array.isArray(fresh))throw new Error('Respuesta de mensajes no válida');
+    const pend=S.msgs.find(m=>m.info&&!m.info.id&&m.info.role==='user');
+    S.msgs=fresh;
+    if(pend&&S.busy){const t=(pend.parts[0]||{}).text,lu=[...fresh].reverse().find(m=>m.info&&m.info.role==='user');
+      if(!lu||!(lu.parts||[]).some(p=>p.text===t))S.msgs.push(pend)}
+    S.loaded=true;S.requestError='';
+    const last=S.msgs[S.msgs.length-1],li=last&&last.info;
+    // Solo se da por terminada la respuesta si el ÚLTIMO mensaje es un assistant completado (evita el falso "terminó" del turno anterior).
+    if(li&&li.role==='assistant'&&((li.time&&li.time.completed)||li.error))setBusy(false);
+  }catch(e){if(S.cur===id)S.requestError='No se pudo actualizar la conversación: '+String(e.message||e)}
+  finally{loading=false;paint();if(again){again=false;scheduleLoad(200)}}
+}
+async function checkStatus(){const id=S.cur;if(!id)return;try{const m=await api('/session/status');if(S.cur!==id||!m||typeof m!=='object')return;
+  const b=!!(m[id]&&m[id].type&&m[id].type!=='idle');if(b)setBusy(true);else if(S.busy&&Date.now()-S.busySince>5000){setBusy(false);scheduleLoad(100)}}catch(e){}}
+function upsertMsg(info){
+  let m=S.msgs.find(x=>x.info&&x.info.id===info.id);
+  if(m){m.info=info;return m}
+  if(info.role==='user'){m=S.msgs.find(x=>x.info&&!x.info.id&&x.info.role==='user');if(m){m.info=info;return m}}
+  m={info,parts:[]};S.msgs.push(m);return m}
+function upsertPart(part){
+  let m=S.msgs.find(x=>x.info&&x.info.id===part.messageID);
+  if(!m){m={info:{id:part.messageID,role:'assistant',sessionID:part.sessionID},parts:[]};S.msgs.push(m);scheduleLoad(400)}
+  let i=m.parts.findIndex(x=>x.id===part.id);
+  if(i<0&&m.info.role==='user')i=m.parts.findIndex(x=>!x.id);
+  if(i>=0)m.parts[i]=part;else m.parts.push(part)}
+function applyDelta(p){const m=S.msgs.find(x=>x.info&&x.info.id===p.messageID),part=m&&(m.parts||[]).find(x=>x.id===p.partID);if(!part)return false;const f=p.field||'text';part[f]=(part[f]||'')+p.delta;return true}
+
+/* ---------- Render por claves: solo se toca lo que cambió (sin parpadeo ni saltos de scroll) ---------- */
+function toolHtml(p){const s=p.state||{},inp=s.input||{};
+  const d=s.title||inp.filePath||inp.command||inp.pattern||inp.url||'';
+  const mark=s.status==='completed'?'✓':s.status==='error'?'✕':'…';
+  let body='';
+  const cut=(x,n)=>{x=typeof x==='string'?x:JSON.stringify(x,null,1);return x.length>n?x.slice(0,n)+'\n…':x};
+  if(Object.keys(inp).length)body+='<pre>'+esc(cut(inp.command||inp,1200))+'</pre>';
+  const out=s.status==='error'?s.error:s.output;if(out)body+='<pre>'+esc(cut(out,2000))+'</pre>';
+  return `<details><summary>${esc(p.tool)} ${esc(d)} ${mark}</summary>${body}</details>`}
+function items(){
+  const out=[];let ui=0;
+  if(S.requestError)out.push({k:'err',cls:'note',html:esc(S.requestError)+'<br><button class="btn s" data-act="reload" style="margin-top:8px">Actualizar respuesta</button>'});
+  S.msgs.forEach((m,i)=>{const info=m.info||{},ps=m.parts||[];
+    if(info.role==='user'){const t=ps.filter(p=>p.type==='text'&&!p.synthetic).map(p=>p.text||'').join('\n');out.push({k:'u'+(ui++),cls:'b u',html:md(t)});return}
+    ps.forEach((p,j)=>{const k=(info.id||'a'+i)+':'+(p.id||j);
+      if(p.type==='text'){if(p.text&&p.text.trim())out.push({k,cls:'b a',html:mdc(p)})}
+      else if(p.type==='reasoning'){if(p.text&&p.text.trim())out.push({k,cls:'think',html:'<details><summary>Razonamiento</summary><div>'+mdc(p)+'</div></details>'})}
+      else if(p.type==='tool')out.push({k,cls:'tool',html:toolHtml(p)})});
+    if(info.error&&errText(info.error))out.push({k:(info.id||i)+':e',cls:'note',html:esc(errText(info.error))})});
+  if(!S.loaded&&!S.msgs.length)out.push({k:'load',cls:'empty muted',html:'Cargando…'});
+  else if(S.loaded&&!S.msgs.length)out.push({k:'empty',cls:'empty muted',html:'Escribe tu primera pregunta para empezar.'});
+  if(S.busy){const s=S.busySince?Math.floor((Date.now()-S.busySince)/1000):0;
+    out.push({k:'busy',cls:'tool',html:(S.qs.some(x=>!x.sessionID||x.sessionID===S.cur)?'Esperando tu respuesta':'Generando · '+s+' s')+(S.lastProgress&&Date.now()-S.lastProgress>20000?' · sin novedades recientes':'')})}
+  return out}
+function syncMsgs(){
+  const box=$('#msgs');if(!box)return;
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<120,its=items(),seen=new Set();let prev=null;
+  for(const it of its){seen.add(it.k);
+    let e=R.map.get(it.k);if(!e){e={el:document.createElement('div'),sig:null};R.map.set(it.k,e)}
+    const sig=it.cls+'|'+it.html;
+    if(e.sig!==sig){const o=e.el.querySelector('details'),was=o&&o.open;e.el.className=it.cls;e.el.innerHTML=it.html;e.sig=sig;if(was){const d=e.el.querySelector('details');if(d)d.open=true}}
+    const want=prev?prev.nextSibling:box.firstChild;if(e.el!==want)box.insertBefore(e.el,want);prev=e.el}
+  for(const [k,e] of R.map)if(!seen.has(k)){e.el.remove();R.map.delete(k)}
+  const g=$('#go');if(g&&g.dataset.b!==String(S.busy)){g.dataset.b=String(S.busy);g.innerHTML=ic(S.busy?I.stop:I.send,20)}
+  if(near||R.stick){box.scrollTop=box.scrollHeight;if(S.loaded)R.stick=false}
+  const dn=$('#down');if(dn)dn.classList.toggle('hide',box.scrollHeight-box.scrollTop-box.clientHeight<200)}
+function paint(){if(R.raf)return;R.raf=requestAnimationFrame(()=>{R.raf=0;syncMsgs();drawPerm();drawQ()})}
+
+/* ---------- Permisos ---------- */
+const normPerm=p=>{const id=p&&(p.id||p.requestID);return id?{id,sessionID:p.sessionID,title:p.title||p.permission||'Ejecutar acción',detail:(p.metadata&&(p.metadata.command||p.metadata.filePath))||(p.patterns||[]).join(', ')}:null};
+async function loadPerms(){try{const r=await api('/permission');if(Array.isArray(r)){S.perms=r.map(normPerm).filter(Boolean);drawPerm()}}catch(e){}}
+let permSig=null;
+function drawPerm(){const e=$('#perm');if(!e)return;const p=S.perms.find(x=>!x.sessionID||x.sessionID===S.cur),sig=p?p.id+(S.perms.length):'';if(sig===permSig)return;permSig=sig;
+  e.innerHTML=p?`<div class="perm"><b>Permiso solicitado</b><div class="c">${esc(p.title)}${p.detail?'<br>'+esc(p.detail):''}</div><div class="row"><button class="btn p" data-r="once">Permitir</button><button class="btn s" data-r="always">Siempre</button><button class="btn s" data-r="reject">Denegar</button></div></div>`:'';
+  e.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>answer(p,b.dataset.r))}
+async function answer(p,k){S.perms=S.perms.filter(x=>x.id!==p.id);permSig=null;drawPerm();
+  try{await api('/permission/'+p.id+'/reply',{method:'POST',headers:J,body:JSON.stringify({reply:k})})}
+  catch(e){try{await api('/session/'+p.sessionID+'/permissions/'+p.id,{method:'POST',headers:J,body:JSON.stringify({response:k})})}catch(x){S.requestError='No se pudo responder el permiso';paint()}}}
+
+/* ---------- Preguntas del agente (herramienta "question") ---------- */
+let qSig=null;
+const normQ=p=>{const id=p&&(p.id||p.requestID);return id&&Array.isArray(p.questions)?{id,sessionID:p.sessionID,questions:p.questions}:null};
+async function loadQs(){try{const r=await api('/question');if(Array.isArray(r)){S.qs=r.map(normQ).filter(Boolean);qSig=null;drawQ();paint()}}catch(e){}}
+function drawQ(){const e=$('#qst');if(!e)return;
+  const q=S.qs.find(x=>!x.sessionID||x.sessionID===S.cur),sig=q?q.id:'';if(sig===qSig)return;qSig=sig;
+  if(!q){e.innerHTML='';return}
+  e.innerHTML='<div class="qcard"><b>OpenCode necesita tu respuesta</b>'+q.questions.map((it,n)=>
+    '<div class="qq" data-multi="'+(it.multiple?1:0)+'"><div class="qh">'+esc(it.header||'')+'</div><div>'+esc(it.question||'')+'</div><div class="chips">'+
+    (it.options||[]).map(o=>'<button type="button" class="chip" data-l="'+esc(o.label)+'">'+esc(o.label)+(o.description?'<small>'+esc(o.description)+'</small>':'')+'</button>').join('')+'</div>'+
+    (it.custom===false?'':'<input class="qin" placeholder="Otra respuesta…">')+'</div>').join('')+
+    '<div class="row"><button class="btn s" data-q="no">Omitir</button><button class="btn p" data-q="ok">Enviar</button></div></div>';
+  e.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const g=c.closest('.qq');if(g.dataset.multi!=='1')g.querySelectorAll('.chip.on').forEach(x=>{if(x!==c)x.classList.remove('on')});c.classList.toggle('on')});
+  e.querySelector('[data-q=no]').onclick=()=>answerQ(q,null);
+  e.querySelector('[data-q=ok]').onclick=()=>{
+    const ans=[...e.querySelectorAll('.qq')].map(g=>{let a=[...g.querySelectorAll('.chip.on')].map(c=>c.dataset.l);const i=g.querySelector('.qin'),v=i&&i.value.trim();
+      if(v){if(g.dataset.multi==='1')a.push(v);else a=[v]}return a});
+    if(ans.some(a=>!a.length)){const b=e.querySelector('[data-q=ok]');b.textContent='Elige una respuesta';setTimeout(()=>{b.textContent='Enviar'},1500);return}
+    answerQ(q,ans)}}
+async function answerQ(q,ans){S.qs=S.qs.filter(x=>x.id!==q.id);qSig=null;drawQ();paint();
+  const id=encodeURIComponent(q.id);
+  try{if(ans)await api('/question/'+id+'/reply',{method:'POST',headers:J,body:JSON.stringify({answers:ans})});else await api('/question/'+id+'/reject',{method:'POST'})}
+  catch(e){S.qs.push(q);qSig=null;S.requestError='No se pudo enviar la respuesta: '+String(e.message||e);paint()}}
+
+/* ---------- Vistas ---------- */
 function nav(on){return `<nav class="nav"><a href="#/" class="${on==='h'?'on':''}">${ic(I.home,20)}<span>Inicio</span></a><a href="#/sessions" class="${on==='p'?'on':''}">${ic(I.chat,20)}<span>Proyectos</span></a><a href="#/models" class="${on==='m'?'on':''}">${ic(I.star,20)}<span>Modelos</span></a><a href="/">${ic(I.cls,20)}<span>Ajustes</span></a></nav>`}
 function route(){
-  const h=location.hash||'#/',v=$('#view');S.cur=null;
-  if(h.startsWith('#/s/')){S.cur=h.slice(4);v.style.padding='0';v.innerHTML=chatShell();bindChat();loadMsgs();return}
-  v.style.padding='28px 20px 110px';
-  if(h==='#/sessions'){v.innerHTML=sessionsView();v.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s);const n=$('#new');if(n)n.onclick=newSession}
-  else if(h==='#/models'){v.innerHTML=modelsView();const refresh=$('#refreshModels');if(refresh)refresh.onclick=()=>loadModels(true);v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);route()})}
-  else{v.innerHTML=homeView();$('#new').onclick=newSession;v.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s)}
-}
-function homeView(){const m=curModel();
-  const count=S.sessions.length;
+  const h=location.hash||'#/',v=$('#view');
+  if(h.startsWith('#/s/')){const id=decodeURIComponent(h.slice(4));
+    if(S.shown!==id){S.shown=id;S.msgs=[];S.loaded=false;S.busy=false;S.busySince=0;S.requestError=''}
+    S.cur=id;v.style.padding='0';v.innerHTML=chatShell();bindChat();return}
+  S.cur=null;S.shown=null;render();refreshSessions()}
+function render(){
+  const h=location.hash||'#/',v=$('#view');if(!v||S.cur)return;v.style.padding='28px 20px 110px';
+  const open=e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s;
+  lastSig=sessSig();
+  if(h==='#/sessions'){v.innerHTML=sessionsView();v.querySelectorAll('[data-s]').forEach(open);const n=$('#new');if(n)n.onclick=newSession}
+  else if(h==='#/models'){v.innerHTML=modelsView();const r=$('#refreshModels');if(r)r.onclick=()=>loadModels(true);v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);render()})}
+  else{v.innerHTML=homeView();$('#new').onclick=newSession;v.querySelectorAll('[data-s]').forEach(open)}}
+const sessRow=s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`;
+function homeView(){const m=curModel(),count=S.sessions.length;
   return `<div class="row" style="gap:14px"><div class="brandmark">${ic(I.cls,29)}</div><div class="grow"><div style="font-size:21px;font-weight:800;letter-spacing:-.4px">OpenCode <span style="color:#9E9AFF">Mobile</span></div><div class="muted sm">Tu espacio para crear con IA</div></div><a class="rb" href="/" aria-label="Ajustes">${ic(I.cls,21)}</a></div>
   ${S.err?`<div class="note">${esc(S.err)}</div>`:''}
-  <div class="card" style="margin-top:20px;padding:17px"><div class="row sp"><div class="row"><span style="width:11px;height:11px;border-radius:50%;background:#45E2A3;box-shadow:0 0 12px #45E2A388"></span><b>Motor OpenCode</b></div><span class="badge g">Activo</span></div><div style="margin-top:12px;font-weight:650">${esc(m?m.name:'Selecciona un modelo')}</div><div class="muted sm" style="margin-top:4px">${m&&S.models.some(x=>x.p===m.p&&x.id===m.id&&x.sourceVerified)?'Modelo gratuito verificado':'Elige un modelo en el catálogo oficial'}</div></div>
+  <div class="card" style="margin-top:20px;padding:17px"><div class="row sp"><div class="row"><span style="width:11px;height:11px;border-radius:50%;background:#45E2A3;box-shadow:0 0 12px #45E2A388"></span><b>Motor OpenCode</b></div><span class="badge g">Activo</span></div><div style="margin-top:12px;font-weight:650">${esc(m?m.name:'Selecciona un modelo')}</div><div class="muted sm" style="margin-top:4px">${m&&S.models.some(x=>x.p===m.p&&x.id===m.id&&x.sourceVerified)?(S.fromCache?'Gratuito (última verificación guardada)':'Modelo gratuito verificado'):'Elige un modelo en el catálogo oficial'}</div></div>
   <h2 style="margin-top:25px">¿Qué quieres hacer?</h2><div class="tiles">
   <a class="card tile" href="#/sessions"><span class="ico">${ic(I.chat,23)}</span><strong>Programar</strong><span>Preguntar, escribir y reparar código</span></a>
   <a class="card tile" href="#/sessions"><span class="ico" style="background:linear-gradient(135deg,#278EFF,#365BFF)">${ic('M3 4h18v16H3zM7 8h10M7 12h7M7 16h5',23)}</span><strong>Crear una web</strong><span>Describe tu idea en el chat</span></a>
   <a class="card tile" href="#/sessions"><span class="ico" style="background:linear-gradient(135deg,#FF4E9B,#E83D72)">${ic(I.cls,23)}</span><strong>Mis proyectos</strong><span>${count} sesiones recientes</span></a>
   <a class="card tile" href="#/models"><span class="ico">${ic(I.star,23)}</span><strong>Modelos IA</strong><span>Solo gratuitos verificados</span></a></div>
   <div class="hero"><div class="row"><span style="font-size:25px">✦</span><div class="grow"><b>Empieza con una idea</b><div class="sm" style="opacity:.85">Crea un proyecto nuevo con tu modelo activo</div></div></div><button class="btn" id="new">＋ Nueva conversación</button></div>
-  <h2>Recientes</h2><div class="list">${S.sessions.slice(0,4).map(s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`).join('')||'<div class="card empty muted">Todavía no hay conversaciones. Crea una para empezar.</div>'}</div>${nav('h')}`}
-function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 18px">Conversaciones y trabajos recientes</div><div class="list">${S.sessions.map(s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`).join('')||'<div class="card empty muted">No hay proyectos todavía.</div>'}</div>${nav('p')}`}
+  <h2>Recientes</h2><div class="list">${S.sessions.slice(0,4).map(sessRow).join('')||'<div class="card empty muted">Todavía no hay conversaciones. Crea una para empezar.</div>'}</div>${nav('h')}`}
+function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new" aria-label="Nueva">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 18px">Conversaciones y trabajos recientes</div><div class="list">${S.sessions.map(sessRow).join('')||'<div class="card empty muted">No hay proyectos todavía.</div>'}</div>${nav('p')}`}
 function modelsView(){
-  const opt=m=>`<div class="card opt ${curModel()&&curModel().p===m.p&&curModel().id===m.id?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}"><div class="grow"><div class="t">${esc(m.name)}</div><div class="muted sm">${esc(m.pn)} · ${esc(m.id)}</div></div><span class="badge g">$0 verificado</span><span class="dot">${curModel()&&curModel().p===m.p&&curModel().id===m.id?ic(I.check,14):''}</span></div>`;
+  const sel=m=>curModel()&&curModel().p===m.p&&curModel().id===m.id;
+  const opt=m=>`<div class="card opt ${sel(m)?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}"><div class="grow"><div class="t">${esc(m.name)}</div><div class="muted sm">${esc(m.pn)} · ${esc(m.id)}</div></div><span class="badge g">${S.fromCache?'$0 (guardado)':'$0 verificado'}</span><span class="dot">${sel(m)?ic(I.check,14):''}</span></div>`;
   const checked=S.catalogAt?`Última comprobación: ${new Date(S.catalogAt).toLocaleString()}`:'Aún no se ha completado una comprobación';
   return `<h1>Modelos gratuitos</h1><div class="muted sm" style="margin-top:4px">Solo OpenCode Zen · precio cero verificado</div>
   <div class="note">Se comprueba el catálogo oficial y el precio de entrada, salida y caché. Si una fuente falla o un precio es desconocido, el modelo se excluye.</div>
@@ -182,55 +312,69 @@ function modelsView(){
   ${S.catalogError?`<div class="note">${esc(S.catalogError)}</div>`:''}
   <div class="list" style="margin-top:16px">${S.models.map(opt).join('')||'<div class="card empty muted">No hay modelos gratuitos verificados ahora mismo. Pulsa actualizar para intentarlo de nuevo.</div>'}</div>
   <a href="/" style="text-decoration:none"><button class="btn s" style="margin-top:18px;box-shadow:var(--sh)">Proveedores y ajustes avanzados</button></a>${nav('m')}`}
-function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel();
-  return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" style="font-size:16px;font-weight:700">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
-  <div id="msgs"></div><div id="perm"></div>
-  <div class="comp"><textarea id="inp" rows="1" placeholder="Mensaje o /comando"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button></div></div>`}
-function bindChat(){
-  $('#bk').onclick=()=>{location.hash='#/'};
-  $('#del').onclick=async()=>{if(confirm('¿Eliminar esta sesión?')){try{await api('/session/'+S.cur,{method:'DELETE'})}catch(e){}await loadSessions();location.hash='#/'}};
-  const i=$('#inp');i.oninput=()=>{i.style.height='auto';i.style.height=Math.min(i.scrollHeight,120)+'px'};
-  $('#go').onclick=async()=>{
-    if(S.busy){try{await api('/session/'+S.cur+'/abort',{method:'POST'})}catch(e){}S.busy=false;S.requestStarted=0;drawMsgs();return}
-    const t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';
-    const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};
-    S.busy=true;S.requestStarted=Date.now();S.lastProgress=Date.now();S.requestError='';S.lastAssistantText='';
-    S.msgs.push({info:{role:'user'},parts:[{type:'text',text:t}]});drawMsgs();
-    try{
-      await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)});
-      setTimeout(loadMsgs,250);
-    }catch(e){S.busy=false;S.requestStarted=0;S.requestError='No se pudo enviar el mensaje: '+String(e.message||e);drawMsgs()}
-  };
-  i.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#go').click()}};
-  drawPerm();
-}
-function drawMsgs(){const box=$('#msgs');if(!box)return;const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
-  box.innerHTML=(S.requestError?`<div class="note">${esc(S.requestError)}<br><button class="btn s" id="retryLoad" style="margin-top:8px">Actualizar respuesta</button></div>`:'')+S.msgs.map(m=>{const r=m.info.role,ps=m.parts||[];
-    if(r==='user')return `<div class="b u">${md(ps.filter(p=>p.type==='text').map(p=>p.text).join('\n'))}</div>`;
-    return ps.map(p=>{
-      if(p.type==='text'&&p.text&&p.text.trim())return `<div class="b a">${md(p.text)}</div>`;
-      if(p.type==='tool'){const s=p.state||{},inp=s.input||{},d=s.title||inp.filePath||inp.command||inp.pattern||'';return `<div class="tool">${esc(p.tool)} ${esc(d)} ${s.status==='completed'?'· listo':s.status==='error'?'· error':'…'}</div>`}
-      return''}).join('')}).join('')+(S.busy?`<div class="tool">Generando · ${S.requestStarted?Math.floor((Date.now()-S.requestStarted)/1000):0} s${S.lastProgress&&Date.now()-S.lastProgress>20000?' · sin texto nuevo recientemente':''}</div>`:'');
-  const retry=$('#retryLoad');if(retry)retry.onclick=()=>{S.requestError='';loadMsgs()};
-  const g=$('#go');if(g)g.innerHTML=ic(S.busy?I.stop:I.send,20);
-  if(near)box.scrollTop=box.scrollHeight}
-function drawPerm(){const e=$('#perm');if(!e)return;const p=S.perm;
-  e.innerHTML=p?`<div class="perm"><b>Permiso solicitado</b><div class="c">${esc(p.title)}${p.detail?'<br>'+esc(p.detail):''}</div><div class="row"><button class="btn p" id="ok">Permitir</button><button class="btn s" id="no">Denegar</button></div></div>`:'';
-  if(p){$('#ok').onclick=()=>answer('once');$('#no').onclick=()=>answer('reject')}}
-async function answer(k){const p=S.perm;S.perm=null;drawPerm();
-  try{await api('/permission/'+p.id+'/reply',{method:'POST',headers:J,body:JSON.stringify({reply:k})})}
-  catch(e){try{await api('/session/'+p.sessionID+'/permissions/'+p.id,{method:'POST',headers:J,body:JSON.stringify({response:k})})}catch(x){}}}
-async function newSession(){try{const s=await api('/session',{method:'POST',headers:J,body:'{}'});S.sessions.unshift(s);location.hash='#/s/'+s.id}catch(e){S.err='No se pudo crear la sesión';route()}}
 
-let deb;function ev(e){let d;try{d=JSON.parse(e.data)}catch(x){return}const t=d.type||'',p=d.properties||{};
-  if(/permission/.test(t)){if(/replied/.test(t)){S.perm=null}else{const id=p.id||p.requestID;if(id)S.perm={id,sessionID:p.sessionID,title:p.title||p.permission||'Ejecutar acción',detail:(p.metadata&&(p.metadata.command||p.metadata.filePath))||(p.patterns||[]).join(', ')}}drawPerm();return}
-  if(/^session\.error/.test(t)){S.requestError='OpenCode notificó un error durante la generación.';S.busy=false;S.requestStarted=0;drawMsgs()}
-  if(/^session\.(idle|status)/.test(t)&&S.cur&&/idle/.test(t)){clearTimeout(deb);deb=setTimeout(loadMsgs,100)}
-  if(/^message\./.test(t)&&S.cur){clearTimeout(deb);deb=setTimeout(loadMsgs,100)}
-  if(/^session\.(updated|created|deleted)/.test(t)&&!S.cur)loadSessions().then(route)}
-try{const es=new EventSource('/event');es.onmessage=ev}catch(e){}
-// Actualiza el chat con mayor frecuencia mientras OpenCode genera la respuesta.
-setInterval(()=>{if(S.cur&&S.busy){loadMsgs();drawMsgs()}},1200);
+/* ---------- Chat ---------- */
+function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel();
+  return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" id="ttl" style="font-size:16px;font-weight:700">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
+  <div id="msgs"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div>
+  <div class="comp"><textarea id="inp" rows="1" placeholder="Escribe un mensaje…"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button></div></div>`}
+async function send(){
+  const i=$('#inp');if(!i)return;
+  if(S.busy){try{await api('/session/'+S.cur+'/abort',{method:'POST'})}catch(e){}setBusy(false);scheduleLoad(300);return}
+  const t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';
+  const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};
+  S.requestError='';setBusy(true);
+  S.msgs.push({info:{role:'user',sessionID:S.cur},parts:[{type:'text',text:t}]});R.stick=true;paint();
+  try{await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)});scheduleLoad(900)}
+  catch(e){const k=S.msgs.findIndex(m=>m.info&&!m.info.id&&m.info.role==='user');if(k>=0)S.msgs.splice(k,1);
+    setBusy(false);S.requestError='No se pudo enviar el mensaje: '+String(e.message||e);const x=$('#inp');if(x&&!x.value)x.value=t;paint()}}
+function bindChat(){
+  R={map:new Map(),raf:0,stick:true};permSig=null;qSig=null;
+  $('#bk').onclick=()=>{location.hash='#/'};
+  $('#del').onclick=async()=>{if(await ask('¿Eliminar esta sesión?','Eliminar')){try{await api('/session/'+S.cur,{method:'DELETE'})}catch(e){}S.sessions=S.sessions.filter(s=>s.id!==S.cur);location.hash='#/'}};
+  const i=$('#inp'),box=$('#msgs'),coarse=matchMedia('(pointer:coarse)').matches;
+  i.oninput=()=>{i.style.height='auto';i.style.height=Math.min(i.scrollHeight,120)+'px'};
+  i.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!coarse&&!e.isComposing){e.preventDefault();send()}};
+  $('#go').onclick=send;
+  $('#down').onclick=()=>{box.scrollTop=box.scrollHeight};
+  box.onscroll=()=>{const d=$('#down');if(d)d.classList.toggle('hide',box.scrollHeight-box.scrollTop-box.clientHeight<200)};
+  box.onclick=e=>{const c=e.target.closest('.cp');
+    if(c){const t=c.closest('.cb').querySelector('pre').textContent;
+      const ok=()=>{c.textContent='Copiado';setTimeout(()=>c.textContent='Copiar',1200)};
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{});
+      else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(x){}ta.remove()}return}
+    if(e.target.dataset&&e.target.dataset.act==='reload'){S.requestError='';loadMsgs()}};
+  syncMsgs();loadMsgs();loadPerms();loadQs();checkStatus()}
+
+/* ---------- Eventos en vivo ---------- */
+let titleT=0;
+function ev(e){let d;try{d=JSON.parse(e.data)}catch(x){return}
+  const t=d.type||'',p=d.properties||{};S.lastEvent=Date.now();
+  if(t.startsWith('permission.')){
+    if(/replied/.test(t)){const id=p.requestID||p.permissionID||p.id;S.perms=S.perms.filter(x=>x.id!==id)}
+    else{const n=normPerm(p);if(n&&!S.perms.some(x=>x.id===n.id))S.perms.push(n)}
+    permSig=null;drawPerm();return}
+  if(t==='question.asked'){const n=normQ(p);if(n&&!S.qs.some(x=>x.id===n.id))S.qs.push(n);qSig=null;drawQ();paint();return}
+  if(t==='question.replied'||t==='question.rejected'){const id=p.requestID||p.id;S.qs=S.qs.filter(x=>x.id!==id);qSig=null;drawQ();paint();return}
+  if(t==='session.status'){if(p.sessionID===S.cur){const k=p.status&&p.status.type;if(k==='busy'||k==='retry')setBusy(true);else if(k==='idle'){setBusy(false);scheduleLoad(150)}}return}
+  if(t==='session.idle'){if(p.sessionID===S.cur){setBusy(false);scheduleLoad(150)}return}
+  if(t==='session.error'){if(!p.sessionID||p.sessionID===S.cur){S.requestError=errText(p.error)||'OpenCode notificó un error durante la generación.';setBusy(false)}return}
+  if(t==='message.updated'){const i=p.info;if(S.cur&&i&&i.sessionID===S.cur){upsertMsg(i);paint()}return}
+  if(t==='message.part.updated'){const q=p.part;if(S.cur&&q&&q.sessionID===S.cur){upsertPart(q);S.lastProgress=Date.now();paint()}return}
+  if(t==='message.part.delta'){if(S.cur&&p.sessionID===S.cur){if(applyDelta(p)){S.lastProgress=Date.now();paint()}else scheduleLoad(300)}return}
+  if(t==='message.removed'||t==='message.part.removed'){if(S.cur&&p.sessionID===S.cur)scheduleLoad(100);return}
+  if(/^session\.(updated|created|deleted)$/.test(t)){
+    const i=p.info;if(i&&t!=='session.deleted')upsertSession(i);else if(i)S.sessions=S.sessions.filter(x=>x.id!==i.id);
+    if(S.cur){const el=$('#ttl'),s=S.sessions.find(x=>x.id===S.cur);if(el&&s&&s.title)el.textContent=s.title}
+    else{clearTimeout(titleT);titleT=setTimeout(()=>{if(!S.cur&&sessSig()!==lastSig)render()},300)}}}
+let es,opened=0;
+function connect(){try{es=new EventSource('/event');es.onmessage=ev;es.onopen=()=>{if(opened++)resync()};es.onerror=()=>{if(es.readyState===2)setTimeout(connect,3000)}}catch(e){}}
+function resync(){if(S.cur){loadMsgs();loadPerms();loadQs();checkStatus()}else refreshSessions()}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)resync()});
+window.addEventListener('online',resync);
+// Red de seguridad mientras se genera: reloj "Generando · N s" y recarga si llevan >8 s sin eventos.
+setInterval(()=>{if(S.cur&&S.busy){paint();if(Date.now()-S.lastEvent>8000){loadMsgs();checkStatus()}}},1000);
 window.onhashchange=route;
-(async()=>{try{await Promise.all([loadModels(),loadSessions()])}catch(e){S.err='No pude cargar datos del servidor'}route()})();
+connect();
+(async()=>{try{await Promise.all([loadModels(),loadSessions()])}catch(e){S.err=/ 401/.test(String(e&&e.message))?'Sin autorización con el servidor local. Cierra y abre la app.':'No pude cargar datos del servidor'}route()})();
 </script></body></html>

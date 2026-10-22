@@ -35,4 +35,37 @@ Con los modelos gratis de OpenCode Zen no necesitas PC ni servidor.
 Esta versión adapta la interfaz móvil a un tema oscuro con tarjetas elevadas, acentos violeta/azul, tarjetas de acceso rápido, navegación inferior y una pantalla de proyectos basada en las sesiones reales del motor OpenCode. La pantalla de modelos conserva la verificación de catálogo y coste de la versión 0.2.0.
 
 La carpeta incluye el código fuente; no incluye una APK compilada.
-\n\n## 0.4.1 — recuperación de interfaz\n\nEsta versión parte de la base 0.3.2 que tenía la interfaz visible y añade una pantalla de error de emergencia para fallos JavaScript. Se retiran temporalmente las funciones adicionales del selector 0.4.0 hasta verificar la causa de la pantalla vacía. No es una APK compilada ni probada en dispositivo.\n
+
+## 0.4.1 — recuperación de interfaz
+Parte de la base 0.3.2 con una pantalla de error de emergencia para fallos JavaScript.
+
+## 0.5.0 — fluidez y estabilidad
+**Interfaz (assets/ui/index.html)**
+- Render por claves: ya no se reconstruye todo el chat cada 1,2 s (adiós parpadeo, saltos de scroll y bloques de código que se reiniciaban).
+- Respuesta en vivo: se aplican los eventos `message.part.updated` / `message.part.delta` del servidor; la recarga completa queda como red de seguridad.
+- Corregido: la respuesta se daba por terminada al instante porque se miraba el último mensaje del turno anterior.
+- Corregido: el botón de eliminar sesión no hacía nada (WebView bloquea `confirm()`); ahora es un diálogo propio.
+- Corregido: CSS duplicado que anulaba el rediseño 0.3.0.
+- Corregido: Markdown rompía el código (`**` dentro de bloques). Nuevo Markdown con títulos, listas, enlaces, citas y botón Copiar.
+- Permisos: se cargan los pendientes al abrir la sesión, solo se muestran los de la sesión actual y se añade "Siempre".
+- Tarjetas de herramientas desplegables (entrada/salida) y bloque de razonamiento.
+- Estado "generando" real (`/session/status`), reconexión de eventos, recarga al volver a la app, botón "ir al final".
+- Enter en teclado móvil inserta salto de línea (se envía con el botón).
+- Catálogo gratuito: caché de 24 h si no hay red (sigue fallando de forma segura pasado ese tiempo).
+
+**Android**
+- WebChromeClient: selector de archivos (adjuntos del panel Ajustes) y consola en logcat; depuración remota con chrome://inspect.
+- Manejo de errores de carga y caída del renderer del WebView (antes: pantalla vacía o cierre de la app).
+- Barras del sistema oscuras en la interfaz (antes: franja clara arriba con tema claro).
+- `launchMode=singleTask` (tocar la notificación ya no abre una segunda instancia).
+- Servidor vigilado: se relanza solo si se cae; al volver a la app se reinicia si Android lo mató.
+- Espera de arranque por HTTP (no solo puerto abierto), hasta 3 min y con fallo rápido si el proceso muere.
+- Descargas con timeouts, progreso limitado y verificación de integridad (sha256 de Alpine, sha512 de npm).
+
+## 0.6.0 — servidor protegido y preguntas del agente
+- **Contraseña del servidor local:** OpenCode arranca con `OPENCODE_SERVER_PASSWORD` (aleatoria, guardada en `files/server.key`, privada de la app). Antes cualquier otra app del teléfono podía conectarse a `127.0.0.1:4096` y ejecutar comandos. El WebView responde solo al desafío de `127.0.0.1` (`onReceivedHttpAuthRequest`).
+  - Si en tu teléfono toda la app da error 401, pon `SECURE_SERVER = false` en `OcRuntime.kt` y vuelve a compilar (y avísame).
+- **Preguntas del agente:** soporte de la herramienta `question` (`/question`, eventos `question.asked/replied/rejected`): opciones de una o varias respuestas, respuesta libre y "Omitir". Antes el agente quedaba esperando sin que se viera nada.
+- Corregido: las tarjetas de permiso no se cerraban tras responder (bug de 0.5.0).
+
+Código fuente sin compilar ni probar en dispositivo: compílalo con GitHub Actions como siempre.

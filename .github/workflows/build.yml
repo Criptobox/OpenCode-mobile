@@ -5,9 +5,13 @@ on:
     branches: [main]
 permissions:
   contents: write
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Descomprimir proyecto (si subiste el zip)
