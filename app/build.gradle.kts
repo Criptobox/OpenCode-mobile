@@ -11,7 +11,7 @@ android {
         // 28: permite ejecutar binarios (PRoot) igual que Termux. Solo instalación manual (APK).
         targetSdk = 28
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
-        versionName = "0.3.0"
+        versionName = "0.4.0"
         ndk { abiFilters += "arm64-v8a" }
     }
     signingConfigs {
