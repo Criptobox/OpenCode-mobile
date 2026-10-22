@@ -100,3 +100,43 @@ Se corrigió el contenedor flex del chat: el panel de mensajes puede reducirse d
 - Se mantiene el montaje de almacenamiento compartido `/storage/emulated/0` como `/sdcard` dentro de PRoot cuando Android permite leerlo.
 
 Validación de esta entrega: comprobación de sintaxis JavaScript y estructura ZIP. No se dispone de Gradle instalado ni se ha compilado/probado el APK en un dispositivo; el actualizador y las notificaciones requieren validación real en Android antes de considerarse verificados.
+
+
+## 0.8.4 — estabilidad del chat
+- Conserva la posición de lectura mientras se actualizan mensajes en streaming.
+- Ajusta la altura útil de WebView al abrir/cerrar el teclado.
+- Mantiene el cuadro de escritura dentro de la zona visible y limita su crecimiento.
+- La cancelación muestra un error claro si el servidor no confirma el aborto.
+- Entrega de código fuente; no se declara compilada ni probada en un teléfono.
+
+
+## 0.8.5 — Diagnóstico de conexión
+- Añadido un diagnóstico de solo lectura en Ajustes para comprobar el motor OpenCode, sesiones, estado y catálogo oficial de modelos.
+- Muestra el resultado individual, tiempo de respuesta, estado de red y conexión de eventos en vivo; permite repetir la prueba.
+- Versión del proyecto actualizada a 0.8.5.
+
+
+## 0.8.6 — Dictado por voz
+- Añade botón de micrófono en el compositor del chat.
+- Usa el reconocedor de voz nativo de Android en español y solicita el permiso de micrófono al primer uso.
+- Inserta el texto reconocido en el cuadro de mensaje; no envía automáticamente.
+- Incluye estado de escucha, cancelación y mensajes de error para falta de permisos o servicio de voz.
+- El dictado depende de que el dispositivo tenga un servicio de reconocimiento de voz instalado y, en algunos dispositivos, conexión a internet.
+
+
+## 0.8.7 — actualizaciones de la APK desde la aplicación
+- Nuevo apartado en Ajustes para configurar el repositorio GitHub que publica la APK (`usuario/repositorio`).
+- Comprueba el último release al abrir la app y después como máximo cada seis horas cuando se vuelve a abrir.
+- El actualizador consulta automáticamente `Criptobox/OpenCode-mobile` al iniciar y cada 6 horas mientras se usa la app. Si hay un APK en un release `build-N` más reciente que el `versionCode` instalado, muestra una notificación. En Ajustes basta pulsar **Actualizar ahora**: descarga la APK con barra de progreso y abre el instalador de Android. Android todavía requiere confirmar la instalación; la APK nueva debe estar firmada con la misma clave que la instalada.
+- Permite descargar la APK y abrir el instalador de Android desde la propia aplicación; Android puede pedir autorización para instalar aplicaciones de esta fuente. La instalación requiere confirmación del usuario.
+- La app conserva el enlace del release y no intenta instalar silenciosamente. No se puede actualizar una APK instalada con una firma distinta.
+- Requiere que el release de GitHub sea accesible públicamente sin iniciar sesión. Si el repositorio es privado, la comprobación pública no funcionará sin una solución autenticada segura.
+- Validación de esta entrega: revisión estática y comprobación de sintaxis JavaScript/ZIP. No se ha compilado ni probado en un teléfono Android.
+
+
+### 0.8.8 — actualización con progreso
+- Pantalla simplificada: botón «Actualizar ahora» busca una versión superior y, si existe, la descarga automáticamente.
+- Barra de progreso y texto de estado durante la descarga.
+- Descarga a archivo temporal y renombrado solo al terminar; rechaza archivos pequeños/incompletos.
+- Android sigue mostrando su confirmación del instalador; no se puede instalar silenciosamente con una APK normal.
+- Requiere que el repositorio oficial de releases se configure una vez al preparar la app; el usuario final no debe tener que escribirlo cuando ese dato esté fijado por el desarrollador.

@@ -1,6 +1,15 @@
 package app.opencodemobile
 
 import android.app.Activity
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.Manifest
+import android.content.pm.PackageManager
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -8,6 +17,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
+import androidx.core.content.FileProvider
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -37,6 +47,8 @@ import android.widget.ScrollView
 import android.widget.TextView
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.atomic.AtomicBoolean
@@ -56,7 +68,12 @@ class MainActivity : Activity() {
     private val logBuf = StringBuilder()
     private val starting = AtomicBoolean(false)
     private var fileCb: ValueCallback<Array<Uri>>? = null
+    private var speechRecognizer: SpeechRecognizer? = null
+    private var voicePending = false
     private val webBg = Color.parseColor("#050D1A")
+    private val updatePrefs by lazy { getSharedPreferences("app_updates", MODE_PRIVATE) }
+    private val updateChannel = "app_updates"
+    private val updateRepo = "Criptobox/OpenCode-mobile"
 
     private fun mimeOf(n: String) = when {
         n.endsWith(".html") -> "text/html"
@@ -84,6 +101,10 @@ class MainActivity : Activity() {
         root.addView(web, ViewGroup.LayoutParams(-1, -1))
         setContentView(root)
         start()
+        if (android.os.Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 730)
+        }
+        ui.postDelayed({ checkAppUpdate(updateRepo, true) }, 8000)
     }
 
     private fun buildSetup(): View {
@@ -185,6 +206,14 @@ class MainActivity : Activity() {
         }
         addJavascriptInterface(object {
             @JavascriptInterface fun taskFinished(title: String) { ui.post { RuntimeService.notifyTaskFinished(this@MainActivity, title.take(100)) } }
+            @JavascriptInterface fun startVoiceInput() { ui.post { startVoiceInputNative() } }
+            @JavascriptInterface fun stopVoiceInput() { ui.post { stopVoiceInputNative() } }
+            @JavascriptInterface fun checkAppUpdateNow() {
+                checkAppUpdate(updateRepo, false)
+            }
+            @JavascriptInterface fun installAppUpdate() {
+                Thread { checkThenDownloadAndInstall(updateRepo) }.start()
+            }
             @JavascriptInterface fun updateOpenCode() {
                 Thread {
                     try {
@@ -262,6 +291,78 @@ class MainActivity : Activity() {
             fileCb?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))
             fileCb = null
         } else super.onActivityResult(requestCode, resultCode, data)
+    }
+
+
+    private fun voiceResult(text: String, error: Boolean = false) {
+        val safe = JSONObject.quote(text)
+        ui.post { if (::web.isInitialized) web.evaluateJavascript("window.onNativeVoiceResult && window.onNativeVoiceResult($safe, $error)", null) }
+    }
+
+    private fun startVoiceInputNative() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            voiceResult("El reconocimiento de voz no está disponible en este dispositivo.", true); return
+        }
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            voicePending = true
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 81)
+            return
+        }
+        stopVoiceInputNative()
+        try {
+            val recognizer = SpeechRecognizer.createSpeechRecognizer(this)
+            speechRecognizer = recognizer
+            recognizer.setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) { voiceResult("Escuchando…") }
+                override fun onBeginningOfSpeech() { }
+                override fun onRmsChanged(rmsdB: Float) { }
+                override fun onBufferReceived(buffer: ByteArray?) { }
+                override fun onEndOfSpeech() { voiceResult("Procesando voz…") }
+                override fun onError(error: Int) {
+                    val msg = when (error) {
+                        SpeechRecognizer.ERROR_NO_MATCH -> "No entendí lo que dijiste. Inténtalo otra vez."
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No se detectó voz. Inténtalo otra vez."
+                        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permiso de micrófono denegado."
+                        SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "El servicio de voz necesita conexión."
+                        else -> "Falló el reconocimiento de voz (código $error)."
+                    }
+                    voiceResult(msg, true); stopVoiceInputNative()
+                }
+                override fun onResults(results: Bundle?) {
+                    val text = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull().orEmpty()
+                    if (text.isBlank()) voiceResult("No se reconoció texto. Inténtalo otra vez.", true) else voiceResult(text)
+                    stopVoiceInputNative()
+                }
+                override fun onPartialResults(partialResults: Bundle?) { }
+                override fun onEvent(eventType: Int, params: Bundle?) { }
+            })
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "es-ES")
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "Habla para dictar tu mensaje")
+            }
+            recognizer.startListening(intent)
+        } catch (e: Exception) {
+            voiceResult("No se pudo iniciar el micrófono: ${e.message ?: "error"}", true)
+            stopVoiceInputNative()
+        }
+    }
+
+    private fun stopVoiceInputNative() {
+        try { speechRecognizer?.cancel(); speechRecognizer?.destroy() } catch (_: Exception) { }
+        speechRecognizer = null
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 81) {
+            val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+            if (granted && voicePending) startVoiceInputNative() else voiceResult("Se necesita permiso de micrófono para dictar.", true)
+            voicePending = false
+        }
     }
 
     private fun appendLog(line: String) = ui.post {
@@ -356,8 +457,170 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun versionParts(value: String): List<Int> {
+        val match = Regex("[0-9]+(?:\\.[0-9]+)*").find(value) ?: return emptyList()
+        return match.value.split('.').mapNotNull { it.toIntOrNull() }
+    }
+
+    private fun isRemoteVersionNewer(remote: String, local: String, localCode: Int): Boolean {
+        // CI releases are tagged build-N; compare that N with Android's installed versionCode.
+        val buildNumber = Regex("(?:^|[-/])build-(\\d+)$", RegexOption.IGNORE_CASE)
+            .find(remote.trim())?.groupValues?.getOrNull(1)?.toIntOrNull()
+        if (buildNumber != null) return buildNumber > localCode
+        val a = versionParts(remote)
+        val b = versionParts(local)
+        if (a.isEmpty() || b.isEmpty()) return false
+        for (i in 0 until maxOf(a.size, b.size)) {
+            val av = a.getOrElse(i) { 0 }
+            val bv = b.getOrElse(i) { 0 }
+            if (av != bv) return av > bv
+        }
+        return false
+    }
+
+    private fun normalizeRepo(value: String): String? {
+        val raw = value.trim().removePrefix("https://github.com/").removeSuffix(".git").trim('/')
+        val parts = raw.split('/')
+        return if (parts.size == 2 && parts.all { it.matches(Regex("[A-Za-z0-9_.-]+")) }) raw else null
+    }
+
+    private fun checkAppUpdate(repoInput: String, notify: Boolean) {
+        Thread {
+            try {
+                val repo = normalizeRepo(repoInput) ?: return@Thread
+                val conn = URL("https://api.github.com/repos/$repo/releases/latest").openConnection() as HttpURLConnection
+                conn.connectTimeout = 10000; conn.readTimeout = 12000
+                conn.setRequestProperty("Accept", "application/vnd.github+json")
+                conn.setRequestProperty("User-Agent", "OpenCode-Mobile")
+                val code = conn.responseCode
+                if (code !in 200..299) error("GitHub respondió HTTP $code")
+                val release = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+                conn.disconnect()
+                val assets = release.optJSONArray("assets") ?: org.json.JSONArray()
+                var apkUrl: String? = null
+                for (i in 0 until assets.length()) {
+                    val a = assets.optJSONObject(i) ?: continue
+                    if (a.optString("name").endsWith(".apk", true)) { apkUrl = a.optString("browser_download_url"); break }
+                }
+                val tag = release.optString("tag_name", "")
+                val packageInfo = packageManager.getPackageInfo(packageName, 0)
+                val localVersion = packageInfo.versionName ?: "0.0.0"
+                val localCode = if (android.os.Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode.toInt() else packageInfo.versionCode
+                updatePrefs.edit().putLong("last_check", System.currentTimeMillis()).apply()
+                if (apkUrl != null && isRemoteVersionNewer(tag, localVersion, localCode)) {
+                    updatePrefs.edit().putString("latest_apk", apkUrl).putString("latest_tag", tag).apply()
+                    ui.post {
+                        web.evaluateJavascript("window.onAppUpdateAvailable && window.onAppUpdateAvailable(${JSONObject.quote(tag)})", null)
+                        if (notify) postUpdateNotification(tag)
+                    }
+                } else {
+                    ui.post { web.evaluateJavascript("window.onAppUpdateResult && window.onAppUpdateResult('La aplicación está actualizada' )", null) }
+                }
+            } catch (e: Exception) {
+                Log.w("OCUpdate", "No se pudo comprobar actualizaciones", e)
+                ui.post { web.evaluateJavascript("window.onAppUpdateResult && window.onAppUpdateResult(${JSONObject.quote("No se pudo comprobar: ${e.message ?: "error de red"}")})", null) }
+            }
+        }.start()
+    }
+
+    private fun updateUiProgress(percent: Int, message: String) {
+        val safe = JSONObject.quote(message)
+        ui.post { web.evaluateJavascript("window.onAppUpdateProgress && window.onAppUpdateProgress($percent,$safe)", null) }
+    }
+
+    private fun checkThenDownloadAndInstall(repo: String) {
+        updateUiProgress(0, "Buscando la versión más reciente…")
+        try {
+            val normalized = normalizeRepo(repo) ?: error("Repositorio de actualizaciones no válido")
+            val conn = URL("https://api.github.com/repos/$normalized/releases/latest").openConnection() as HttpURLConnection
+            conn.connectTimeout = 10000; conn.readTimeout = 12000
+            conn.setRequestProperty("Accept", "application/vnd.github+json")
+            conn.setRequestProperty("User-Agent", "OpenCode-Mobile")
+            if (conn.responseCode !in 200..299) error("No se pudo consultar el lanzamiento oficial")
+            val release = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+            conn.disconnect()
+            val assets = release.optJSONArray("assets") ?: org.json.JSONArray()
+            var apkUrl: String? = null
+            for (i in 0 until assets.length()) {
+                val asset = assets.optJSONObject(i) ?: continue
+                if (asset.optString("name").endsWith(".apk", true)) { apkUrl = asset.optString("browser_download_url"); break }
+            }
+            val tag = release.optString("tag_name", "versión nueva")
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val localVersion = packageInfo.versionName ?: "0.0.0"
+            val localCode = if (android.os.Build.VERSION.SDK_INT >= 28) packageInfo.longVersionCode.toInt() else packageInfo.versionCode
+            if (apkUrl.isNullOrBlank() || !isRemoteVersionNewer(tag, localVersion, localCode)) {
+                updateUiProgress(100, "Ya tienes la última versión instalada.")
+                return
+            }
+            updatePrefs.edit().putString("latest_apk", apkUrl).putString("latest_tag", tag).apply()
+            updateUiProgress(2, "Descargando $tag…")
+            downloadAndInstallApk(repo, apkUrl)
+        } catch (e: Exception) {
+            updateUiProgress(0, "Actualización fallida: ${e.message ?: "error de conexión"}")
+        }
+    }
+
+    private fun postUpdateNotification(tag: String) {
+        val nm = getSystemService(NotificationManager::class.java)
+        nm.createNotificationChannel(NotificationChannel(updateChannel, "Actualizaciones de la aplicación", NotificationManager.IMPORTANCE_DEFAULT))
+        val open = PendingIntent.getActivity(this, 73, Intent(this, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val n = Notification.Builder(this, updateChannel)
+            .setSmallIcon(R.drawable.ic_stat)
+            .setContentTitle("Nueva versión de OpenCode Mobile")
+            .setContentText("La versión $tag está disponible. Abre la aplicación para actualizar.")
+            .setContentIntent(open).setAutoCancel(true).build()
+        nm.notify(7301, n)
+    }
+
+    private fun downloadAndInstallApk(repo: String, apkUrl: String? = null) {
+        try {
+            val url = apkUrl ?: updatePrefs.getString("latest_apk", null) ?: error("No se encontró una APK en el lanzamiento")
+            val conn = URL(url).openConnection() as HttpURLConnection
+            conn.connectTimeout = 15000; conn.readTimeout = 30000
+            conn.setRequestProperty("User-Agent", "OpenCode-Mobile")
+            val total = conn.contentLengthLong
+            val file = File(cacheDir, "opencode-mobile-update.apk.part")
+            var done = 0L
+            conn.inputStream.use { input -> FileOutputStream(file).use { output ->
+                val buf = ByteArray(64 * 1024); var n: Int; var last = 0L
+                while (input.read(buf).also { n = it } >= 0) {
+                    if (n == 0) continue
+                    output.write(buf, 0, n); done += n
+                    val now = System.currentTimeMillis()
+                    if (now - last > 180) {
+                        last = now
+                        val pct = if (total > 0) (5 + (done * 90 / total).toInt()).coerceIn(5, 95) else 5
+                        updateUiProgress(pct, if (total > 0) "Descargando actualización · ${done / 1024} / ${total / 1024} KB" else "Descargando actualización · ${done / 1024} KB")
+                    }
+                }
+                output.flush()
+            } }
+            conn.disconnect()
+            if (file.length() < 1024 * 1024) { file.delete(); error("La descarga parece incompleta; inténtalo de nuevo") }
+            val apk = File(cacheDir, "opencode-mobile-update.apk")
+            if (apk.exists()) apk.delete()
+            if (!file.renameTo(apk)) error("No se pudo preparar el instalador")
+            updateUiProgress(100, "Descarga completa. Abriendo el instalador de Android…")
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", apk)
+            ui.post {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    web.evaluateJavascript("window.onAppUpdateResult && window.onAppUpdateResult(${JSONObject.quote("No se pudo abrir el instalador: ${e.message ?: "error"}")})", null)
+                }
+            }
+        } catch (e: Exception) {
+            updateUiProgress(0, "Error: ${e.message ?: "no se pudo descargar"}")
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+        val last = updatePrefs.getLong("last_check", 0L)
+        if (System.currentTimeMillis() - last > 6 * 60 * 60 * 1000L) ui.postDelayed({ checkAppUpdate(updateRepo, true) }, 1500)
         // Si Android mató el servidor mientras la app estaba en segundo plano, se reinicia solo al volver.
         if (web.visibility == View.VISIBLE && !starting.get()) {
             Thread { if (!rt.serverReady()) ui.post { start() } }.start()
@@ -371,6 +634,7 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         fileCb?.onReceiveValue(null); fileCb = null
+        stopVoiceInputNative()
         web.destroy()
         super.onDestroy()
     }
