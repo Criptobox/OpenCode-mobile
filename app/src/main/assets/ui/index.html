@@ -76,10 +76,18 @@ h2{font-size:18px;margin:26px 0 12px}
 </style></head><body>
 <div id="view"></div>
 <script>
+window.addEventListener('error',function(e){
+  try{var v=document.getElementById('view');if(v&&!v.innerHTML.trim())v.innerHTML='<div style="padding:24px;color:#f4f7ff;font:16px system-ui"><h2>OpenCode Mobile no pudo cargar</h2><p>Se produjo un error en la interfaz. Vuelve al inicio o reinicia la aplicación.</p><pre style="white-space:pre-wrap;color:#ffb4b4">'+String(e.message||'Error JavaScript')+'</pre></div>';}catch(_){}
+});
+window.addEventListener('unhandledrejection',function(e){
+  try{var v=document.getElementById('view');if(v&&!v.innerHTML.trim())v.innerHTML='<div style="padding:24px;color:#f4f7ff;font:16px system-ui"><h2>No se pudo iniciar OpenCode Mobile</h2><p>El servidor local no respondió correctamente. Reinicia la aplicación y vuelve a intentarlo.</p></div>';}catch(_){}
+});
+</script>
+<script>
 const $=s=>document.querySelector(s), J={'content-type':'application/json'};
 const api=(p,o)=>fetch(p,o).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.status===204?null:r.json().catch(()=>null)});
 const st={get:(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let S={sessions:[],models:[],model:st.get('model',null),cur:null,msgs:[],busy:false,perm:null,err:'',catalogAt:0,catalogError:'',refreshing:false,requestStarted:0,lastProgress:0,requestError:'',lastAssistantText:'',polling:false,firstTokenAt:0,modelQuery:'',modelFavorites:st.get('modelFavorites',[]),latencyStats:st.get('latencyStats',{})};
+let S={sessions:[],models:[],model:st.get('model',null),cur:null,msgs:[],busy:false,perm:null,err:'',catalogAt:0,catalogError:'',refreshing:false,requestStarted:0,lastProgress:0,requestError:'',lastAssistantText:''};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10'};
@@ -127,8 +135,7 @@ async function loadModels(manual=false){
 }
 async function loadSessions(){const r=await api('/session');S.sessions=(r||[]).sort((a,b)=>((b.time||{}).updated||0)-((a.time||{}).updated||0))}
 async function loadMsgs(){
-  if(!S.cur||S.polling)return;
-  S.polling=true;
+  if(!S.cur)return;
   try{
     const fresh=await api('/session/'+S.cur+'/message');
     if(!Array.isArray(fresh))throw new Error('Respuesta de mensajes no válida');
@@ -137,10 +144,10 @@ async function loadMsgs(){
     const last=assistants[assistants.length-1];
     const completed=!!(last&&last.info&&last.info.time&&last.info.time.completed);
     const latestText=last&&Array.isArray(last.parts)?last.parts.filter(p=>p.type==='text').map(p=>p.text||'').join(''):'';
-    if(latestText!==S.lastAssistantText){S.lastAssistantText=latestText;S.lastProgress=Date.now();if(latestText.trim()&&!S.firstTokenAt&&S.requestStarted){S.firstTokenAt=Date.now();const key=S.model?S.model.p+'/'+S.model.id:'unknown';const stats=S.latencyStats[key]||{n:0,total:0,last:0};stats.n++;stats.last=S.firstTokenAt-S.requestStarted;stats.total+=stats.last;S.latencyStats[key]=stats;st.set('latencyStats',S.latencyStats)}}
+    if(latestText!==S.lastAssistantText){S.lastAssistantText=latestText;S.lastProgress=Date.now()}
     if(S.busy&&last&&completed){S.busy=false;S.requestError='';S.requestStarted=0}
     drawMsgs();
-  }catch(e){S.requestError='No se pudo actualizar la respuesta: '+String(e.message||e);drawMsgs()}finally{S.polling=false}
+  }catch(e){S.requestError='No se pudo actualizar la respuesta: '+String(e.message||e);drawMsgs()}
 }
 
 function nav(on){return `<nav class="nav"><a href="#/" class="${on==='h'?'on':''}">${ic(I.home,20)}<span>Inicio</span></a><a href="#/sessions" class="${on==='p'?'on':''}">${ic(I.chat,20)}<span>Proyectos</span></a><a href="#/models" class="${on==='m'?'on':''}">${ic(I.star,20)}<span>Modelos</span></a><a href="/">${ic(I.cls,20)}<span>Ajustes</span></a></nav>`}
@@ -149,7 +156,7 @@ function route(){
   if(h.startsWith('#/s/')){S.cur=h.slice(4);v.style.padding='0';v.innerHTML=chatShell();bindChat();loadMsgs();return}
   v.style.padding='28px 20px 110px';
   if(h==='#/sessions'){v.innerHTML=sessionsView();v.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s);const n=$('#new');if(n)n.onclick=newSession}
-  else if(h==='#/models'){v.innerHTML=modelsView();const refresh=$('#refreshModels');if(refresh)refresh.onclick=()=>loadModels(true);const search=$('#modelSearch');if(search)search.oninput=()=>{S.modelQuery=search.value;const pos=search.selectionStart;route();const next=$('#modelSearch');if(next){next.focus();next.setSelectionRange(pos,pos)}};v.querySelectorAll('[data-fav]').forEach(e=>e.onclick=ev=>{ev.stopPropagation();const k=e.dataset.fav;S.modelFavorites=S.modelFavorites.includes(k)?S.modelFavorites.filter(x=>x!==k):[...S.modelFavorites,k];st.set('modelFavorites',S.modelFavorites);route()});v.querySelectorAll('[data-m]').forEach(e=>e.onclick=ev=>{if(ev.target.closest('[data-fav]'))return;const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);route()})}
+  else if(h==='#/models'){v.innerHTML=modelsView();const refresh=$('#refreshModels');if(refresh)refresh.onclick=()=>loadModels(true);v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);route()})}
   else{v.innerHTML=homeView();$('#new').onclick=newSession;v.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s)}
 }
 function homeView(){const m=curModel();
@@ -166,19 +173,14 @@ function homeView(){const m=curModel();
   <h2>Recientes</h2><div class="list">${S.sessions.slice(0,4).map(s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`).join('')||'<div class="card empty muted">Todavía no hay conversaciones. Crea una para empezar.</div>'}</div>${nav('h')}`}
 function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 18px">Conversaciones y trabajos recientes</div><div class="list">${S.sessions.map(s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`).join('')||'<div class="card empty muted">No hay proyectos todavía.</div>'}</div>${nav('p')}`}
 function modelsView(){
-  const query=S.modelQuery.toLowerCase().trim();
-  const visible=S.models.filter(m=>!query||(m.name+' '+m.id+' '+m.pn).toLowerCase().includes(query));
-  const key=m=>m.p+'/'+m.id;
-  const opt=m=>{const selected=curModel()&&curModel().p===m.p&&curModel().id===m.id;const fav=S.modelFavorites.includes(key(m));const stat=S.latencyStats[key(m)];return `<div class="card opt ${selected?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}"><div class="grow"><div class="t">${esc(m.name)}</div><div class="muted sm">${esc(m.pn)} · ${esc(m.id)}</div><div class="muted sm">${stat?'Primera respuesta media: '+Math.round(stat.total/stat.n/1000)+' s · última: '+(stat.last/1000).toFixed(1)+' s':'Aún sin medición local'}</div></div><button class="rb favModel" data-fav="${esc(key(m))}" aria-label="Favorito" style="width:38px;height:38px;color:${fav?'#FFD18A':'#9FB0C8'}">★</button><span class="badge g">$0 verificado</span><span class="dot">${selected?ic(I.check,14):''}</span></div>`};
+  const opt=m=>`<div class="card opt ${curModel()&&curModel().p===m.p&&curModel().id===m.id?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}"><div class="grow"><div class="t">${esc(m.name)}</div><div class="muted sm">${esc(m.pn)} · ${esc(m.id)}</div></div><span class="badge g">$0 verificado</span><span class="dot">${curModel()&&curModel().p===m.p&&curModel().id===m.id?ic(I.check,14):''}</span></div>`;
   const checked=S.catalogAt?`Última comprobación: ${new Date(S.catalogAt).toLocaleString()}`:'Aún no se ha completado una comprobación';
   return `<h1>Modelos gratuitos</h1><div class="muted sm" style="margin-top:4px">Solo OpenCode Zen · precio cero verificado</div>
   <div class="note">Se comprueba el catálogo oficial y el precio de entrada, salida y caché. Si una fuente falla o un precio es desconocido, el modelo se excluye.</div>
-  <input id="modelSearch" value="${esc(S.modelQuery)}" placeholder="Buscar modelo por nombre…" style="width:100%;margin-top:14px;padding:14px;border-radius:15px;border:1px solid #263D5C;background:#101F34;color:var(--text);font:inherit">
-  <div class="muted sm" style="margin-top:8px">${S.modelFavorites.length?'Favoritos guardados: '+S.modelFavorites.length:'Marca ★ para guardar tus modelos favoritos'} · Las mediciones se registran localmente tras usar cada modelo.</div>
   <button class="btn p" id="refreshModels" style="margin-top:14px" ${S.refreshing?'disabled':''}>${S.refreshing?'Comprobando…':'↻ Actualizar modelos oficiales'}</button>
   <div class="muted sm" style="margin:10px 2px">${esc(checked)}</div>
   ${S.catalogError?`<div class="note">${esc(S.catalogError)}</div>`:''}
-  <div class="list" style="margin-top:16px">${visible.map(opt).join('')||'<div class="card empty muted">No hay modelos que coincidan con la búsqueda o no hay modelos gratuitos verificados. Actualiza el catálogo o cambia la búsqueda.</div>'}</div>
+  <div class="list" style="margin-top:16px">${S.models.map(opt).join('')||'<div class="card empty muted">No hay modelos gratuitos verificados ahora mismo. Pulsa actualizar para intentarlo de nuevo.</div>'}</div>
   <a href="/" style="text-decoration:none"><button class="btn s" style="margin-top:18px;box-shadow:var(--sh)">Proveedores y ajustes avanzados</button></a>${nav('m')}`}
 function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel();
   return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" style="font-size:16px;font-weight:700">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
@@ -192,7 +194,7 @@ function bindChat(){
     if(S.busy){try{await api('/session/'+S.cur+'/abort',{method:'POST'})}catch(e){}S.busy=false;S.requestStarted=0;drawMsgs();return}
     const t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';
     const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};
-    S.busy=true;S.requestStarted=Date.now();S.lastProgress=Date.now();S.firstTokenAt=0;S.requestError='';S.lastAssistantText='';
+    S.busy=true;S.requestStarted=Date.now();S.lastProgress=Date.now();S.requestError='';S.lastAssistantText='';
     S.msgs.push({info:{role:'user'},parts:[{type:'text',text:t}]});drawMsgs();
     try{
       await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)});
@@ -208,7 +210,7 @@ function drawMsgs(){const box=$('#msgs');if(!box)return;const near=box.scrollHei
     return ps.map(p=>{
       if(p.type==='text'&&p.text&&p.text.trim())return `<div class="b a">${md(p.text)}</div>`;
       if(p.type==='tool'){const s=p.state||{},inp=s.input||{},d=s.title||inp.filePath||inp.command||inp.pattern||'';return `<div class="tool">${esc(p.tool)} ${esc(d)} ${s.status==='completed'?'· listo':s.status==='error'?'· error':'…'}</div>`}
-      return''}).join('')}).join('')+(S.busy?`<div class="tool">Generando · ${S.requestStarted?Math.floor((Date.now()-S.requestStarted)/1000):0} s${S.firstTokenAt?' · primera respuesta '+((S.firstTokenAt-S.requestStarted)/1000).toFixed(1)+' s':''}${S.lastProgress&&Date.now()-S.lastProgress>20000?' · sin texto nuevo recientemente':''}</div>`:'');
+      return''}).join('')}).join('')+(S.busy?`<div class="tool">Generando · ${S.requestStarted?Math.floor((Date.now()-S.requestStarted)/1000):0} s${S.lastProgress&&Date.now()-S.lastProgress>20000?' · sin texto nuevo recientemente':''}</div>`:'');
   const retry=$('#retryLoad');if(retry)retry.onclick=()=>{S.requestError='';loadMsgs()};
   const g=$('#go');if(g)g.innerHTML=ic(S.busy?I.stop:I.send,20);
   if(near)box.scrollTop=box.scrollHeight}
@@ -228,7 +230,7 @@ let deb;function ev(e){let d;try{d=JSON.parse(e.data)}catch(x){return}const t=d.
   if(/^session\.(updated|created|deleted)/.test(t)&&!S.cur)loadSessions().then(route)}
 try{const es=new EventSource('/event');es.onmessage=ev}catch(e){}
 // Actualiza el chat con mayor frecuencia mientras OpenCode genera la respuesta.
-setInterval(()=>{if(S.cur&&S.busy){loadMsgs()}},900);
+setInterval(()=>{if(S.cur&&S.busy){loadMsgs();drawMsgs()}},1200);
 window.onhashchange=route;
 (async()=>{try{await Promise.all([loadModels(),loadSessions()])}catch(e){S.err='No pude cargar datos del servidor'}route()})();
 </script></body></html>

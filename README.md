@@ -35,13 +35,4 @@ Con los modelos gratis de OpenCode Zen no necesitas PC ni servidor.
 Esta versión adapta la interfaz móvil a un tema oscuro con tarjetas elevadas, acentos violeta/azul, tarjetas de acceso rápido, navegación inferior y una pantalla de proyectos basada en las sesiones reales del motor OpenCode. La pantalla de modelos conserva la verificación de catálogo y coste de la versión 0.2.0.
 
 La carpeta incluye el código fuente; no incluye una APK compilada.
-
-
-## OpenCode Mobile 0.4.0 — chat y modelos
-- Evita llamadas simultáneas a la consulta de mensajes para reducir tráfico y condiciones de carrera durante el chat.
-- Actualiza el estado del chat durante la generación sin forzar un redibujado en cada tick.
-- Mide localmente el tiempo hasta el primer texto recibido por modelo y muestra última/ media en el selector. Esto mide el rendimiento observado desde esta APK, no la velocidad interna del proveedor.
-- Añade búsqueda de modelos gratuitos verificados y favoritos persistidos localmente.
-- Conserva el filtro estricto: solo modelos presentes en el catálogo oficial y con todos los costes requeridos explícitamente en cero.
-
-**Limitación:** el tiempo hasta el primer texto solo se mide cuando OpenCode expone texto en el endpoint de mensajes; no garantiza streaming token a token. Los repositorios y archivos dependen de las rutas que soporte el servidor OpenCode de esta instalación y no se han añadido botones que finjan esa funcionalidad. Esta entrega es código fuente, no una APK compilada ni probada en un teléfono.
+\n\n## 0.4.1 — recuperación de interfaz\n\nEsta versión parte de la base 0.3.2 que tenía la interfaz visible y añade una pantalla de error de emergencia para fallos JavaScript. Se retiran temporalmente las funciones adicionales del selector 0.4.0 hasta verificar la causa de la pantalla vacía. No es una APK compilada ni probada en dispositivo.\n
