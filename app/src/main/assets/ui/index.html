@@ -7,7 +7,8 @@
  :root{color-scheme:dark;--bg:#050D1A;--card:#101F34;--text:#F5F7FF;--muted:#9FB0C8;--acc:#6554FF;--soft:#182B47;--sofft:#BFC5FF;--mint:#123D37;--mintt:#64F0BB;--amber:#3B2D18;--ambert:#FFD18A;--nav:#081426;--sh:0 8px 26px rgba(0,0,0,.25);--del:#421F2D;--delt:#FFB3C0}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:radial-gradient(ellipse at top,#122544 0%,var(--bg) 52%);color:var(--text);font:400 15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-#view{height:100dvh;overflow-y:auto;padding:28px 18px 110px}
+#view{height:100dvh;overflow-y:auto;padding:28px 18px 110px;min-height:0}
+#view.chat-host{height:100dvh;overflow:hidden;padding:0!important;display:flex;flex-direction:column;min-height:0}
 h1{font-size:27px;line-height:1.15;margin:4px 0 0;font-weight:800;letter-spacing:-.5px}
 .muted{color:var(--muted)}.sm{font-size:12px}.row{display:flex;align-items:center;gap:12px}.sp{justify-content:space-between}
 .badge{font:700 11px system-ui;padding:5px 10px;border-radius:999px;white-space:nowrap;background:#243A5A;color:#C5D6F3}
@@ -23,7 +24,22 @@ h2{font-size:17px;margin:24px 0 12px}.list{display:flex;flex-direction:column;ga
 .nav{position:fixed;left:10px;right:10px;bottom:calc(9px + env(safe-area-inset-bottom));height:68px;border-radius:24px;background:rgba(7,19,37,.97);border:1px solid #1C3150;display:flex;justify-content:space-around;align-items:center;padding:0 5px;z-index:5;box-shadow:0 10px 35px #0008;backdrop-filter:blur(16px)}
 .nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#A9BBD4;text-decoration:none;font:600 10px system-ui;min-height:54px;min-width:62px;padding:4px 8px;border-radius:17px}
 .nav a.on{background:#252C65;color:#B9B4FF}.nav a.on svg{color:#A9A0FF}
-.chat{display:flex;flex-direction:column;height:100dvh;background:transparent}.top{padding:20px 16px 10px;display:flex;align-items:center;gap:10px}
+.chat{display:flex;flex-direction:column;height:100%;min-height:0;width:100%;background:transparent;overflow:hidden}.top{padding:calc(10px + env(safe-area-inset-top)) 14px 8px;display:flex;align-items:center;gap:10px;flex:none}
+#view.chat-host .chat{height:100%;min-height:0}
+.chattools{flex:none;scrollbar-width:none}
+#msgs{min-height:0;flex:1 1 auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin}
+.chatmode{display:flex;align-items:center;gap:9px;padding:6px 14px 9px;flex:none}
+.modeavatar{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;font-size:21px;background:linear-gradient(145deg,#6d50ff,#317de8);box-shadow:0 5px 16px #463dff35;flex:none}
+.modetext{min-width:0;flex:1}.modetitle{font-size:13px;font-weight:750}.modesub{font-size:11px;color:var(--muted)}
+#chatModel{max-width:54vw;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.attach{width:42px;height:42px;border:1px solid #2c4568;border-radius:15px;background:#172943;color:#dbe5ff;display:grid;place-items:center;flex:none}
+.comp{flex:none;margin:5px 10px calc(8px + env(safe-area-inset-bottom));gap:7px;padding:6px;border-radius:22px}
+#inp{min-width:0}
+.attachments{display:flex;gap:8px;overflow-x:auto;padding:0 14px 7px;flex:none}
+.filechip{display:flex;align-items:center;gap:7px;max-width:80%;padding:7px 10px;border:1px solid #2b4567;border-radius:12px;background:#132641;font-size:12px;flex:none}
+.filechip span{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.filechip button{border:0;background:none;color:#ffb8c2;font-size:18px}
+.filehint{font-size:11px;color:var(--muted);padding:0 15px 5px;flex:none}
+@media(max-height:520px){.top{padding-top:4px}.chatmode{padding-top:2px;padding-bottom:3px}.chattools{padding-bottom:3px}.comp{margin-bottom:4px}}
 .rb{width:44px;height:44px;border:1px solid #243B5B;border-radius:17px;background:#12233A;color:var(--text);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;flex:none}
 #msgs{flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px}
 .b{max-width:88%;padding:13px 16px;border-radius:21px;word-wrap:break-word;overflow-wrap:anywhere}.b.u{align-self:flex-end;background:linear-gradient(130deg,#6653FF,#4969FF);color:#fff;border-bottom-right-radius:6px}.b.a{background:#13243B;border:1px solid #203552;box-shadow:var(--sh);border-bottom-left-radius:6px}
@@ -86,7 +102,7 @@ const $=s=>document.querySelector(s), J={'content-type':'application/json'};
 const api=(p,o={})=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),o.timeout||20000);
   return fetch(p,{...o,signal:c.signal}).then(r=>{if(!r.ok)throw new Error(p+' '+r.status);return r.status===204?null:r.json().catch(()=>null)}).finally(()=>clearTimeout(t))};
 const st={get:(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let S={sessions:[],models:[],model:st.get('model',null),cur:null,shown:null,msgs:[],loaded:false,busy:false,busySince:0,perms:[],qs:[],err:'',catalogAt:0,catalogError:'',fromCache:false,refreshing:false,lastProgress:0,lastEvent:0,requestError:'',agent:st.get('agent','build'),msgLimit:80};
+let S={sessions:[],models:[],model:st.get('model',null),cur:null,shown:null,msgs:[],loaded:false,busy:false,busySince:0,perms:[],qs:[],err:'',catalogAt:0,catalogError:'',fromCache:false,refreshing:false,lastProgress:0,lastEvent:0,requestError:'',agent:st.get('agent','build'),msgLimit:80,attachments:[]};
 let R={map:new Map(),raf:0,stick:true};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
@@ -214,7 +230,7 @@ function items(){
   const out=[];let ui=0;
   if(S.requestError)out.push({k:'err',cls:'note',html:esc(S.requestError)+'<br><button class="btn s" data-act="reload" style="margin-top:8px">Actualizar respuesta</button>'});
   S.msgs.forEach((m,i)=>{const info=m.info||{},ps=m.parts||[];
-    if(info.role==='user'){const t=ps.filter(p=>p.type==='text'&&!p.synthetic).map(p=>p.text||'').join('\n');out.push({k:'u'+(ui++),cls:'b u',html:md(t)});return}
+    if(info.role==='user'){const t=ps.filter(p=>p.type==='text'&&!p.synthetic).map(p=>p.text||'').join('\n');const fs=ps.filter(p=>p.type==='file').map(p=>{const n=esc(p.name||'Archivo adjunto'),mime=p.mime||'';return mime.startsWith('image/')&&p.url?'<div style="margin-top:8px"><img src="'+esc(p.url)+'" alt="'+n+'" style="display:block;max-width:100%;max-height:220px;border-radius:12px"></div>':'<div style="margin-top:7px;padding:8px 10px;border-radius:10px;background:#ffffff18;font-size:12px">📎 '+n+'</div>'}).join('');out.push({k:'u'+(ui++),cls:'b u',html:md(t)+fs});return}
     ps.forEach((p,j)=>{const k=(info.id||'a'+i)+':'+(p.id||j);
       if(p.type==='text'){if(p.text&&p.text.trim())out.push({k,cls:'b a',html:mdc(p)})}
       else if(p.type==='reasoning'){if(p.text&&p.text.trim())out.push({k,cls:'think',html:'<details><summary>Razonamiento</summary><div>'+mdc(p)+'</div></details>'})}
@@ -282,17 +298,17 @@ async function answerQ(q,ans){S.qs=S.qs.filter(x=>x.id!==q.id);qSig=null;drawQ()
 function nav(on){return `<nav class="nav"><a href="#/" class="${on==='h'?'on':''}">${ic(I.home,20)}<span>Inicio</span></a><a href="#/sessions" class="${on==='p'?'on':''}">${ic(I.chat,20)}<span>Proyectos</span></a><a href="#/models" class="${on==='m'?'on':''}">${ic(I.star,20)}<span>Modelos</span></a><a href="#/settings" class="${on==='set'?'on':''}">${ic(I.cls,20)}<span>Ajustes</span></a></nav>`}
 function route(){
   const h=location.hash||'#/',v=$('#view');
-  if(h.startsWith('#/s/')){const id=decodeURIComponent(h.slice(4));
+  if(h.startsWith('#/s/')){v.classList.add('chat-host');const id=decodeURIComponent(h.slice(4));
     if(S.shown!==id){S.shown=id;S.msgs=[];S.loaded=false;S.busy=false;S.busySince=0;S.requestError=''}
     S.cur=id;v.style.padding='0';v.innerHTML=chatShell();bindChat();return}
-  S.cur=null;S.shown=null;render();refreshSessions()}
+  v.classList.remove('chat-host');S.cur=null;S.shown=null;render();refreshSessions()}
 function render(){
   const h=location.hash||'#/',v=$('#view');if(!v||S.cur)return;v.style.padding='28px 20px 110px';
   const open=e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s;
   lastSig=sessSig();
   if(h==='#/settings'){v.innerHTML=settingsView();const up=$('#updateOC');if(up)up.onclick=()=>{if(window.OpenCodeNative&&OpenCodeNative.updateOpenCode)OpenCodeNative.updateOpenCode();else alert('Actualizador nativo no disponible en esta compilación')};return}
   if(h==='#/sessions'){v.innerHTML=sessionsView();v.querySelectorAll('[data-s]').forEach(open);const n=$('#new');if(n)n.onclick=newSession}
-  else if(h==='#/models'){v.innerHTML=modelsView();const r=$('#refreshModels');if(r)r.onclick=()=>loadModels(true);v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);render()})}
+  else if(h==='#/models'){v.innerHTML=modelsView();const r=$('#refreshModels');if(r)r.onclick=()=>loadModels(true);const bindModelCards=()=>v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);render()});bindModelCards();const search=$('#modelSearch');if(search)search.oninput=()=>{const q=search.value.trim().toLowerCase(),filtered=S.models.filter(x=>(x.name+' '+x.id+' '+x.pn).toLowerCase().includes(q));const list=$('#modelList');if(list)list.innerHTML=filtered.map(opt).join('')||'<div class="card empty muted">No hay coincidencias. Prueba otro nombre.</div>';const count=$('#modelCount');if(count)count.textContent=filtered.length+' de '+S.models.length+' modelos';bindModelCards()}}
   else{v.innerHTML=homeView();$('#new').onclick=newSession;v.querySelectorAll('[data-s]').forEach(open)}}
 const sessRow=s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`;
 function homeView(){const m=curModel(),count=S.sessions.length;
@@ -310,43 +326,48 @@ function settingsView(){return `<h1>Ajustes</h1><div class="muted sm" style="mar
 function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new" aria-label="Nueva">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 18px">Conversaciones y trabajos recientes</div><div class="list">${S.sessions.map(sessRow).join('')||'<div class="card empty muted">No hay proyectos todavía.</div>'}</div>${nav('p')}`}
 function modelsView(){
   const sel=m=>curModel()&&curModel().p===m.p&&curModel().id===m.id;
-  const opt=m=>`<div class="card opt ${sel(m)?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}"><div class="grow"><div class="t">${esc(m.name)}</div><div class="muted sm">${esc(m.pn)} · ${esc(m.id)}</div></div><span class="badge g">${S.fromCache?'$0 (guardado)':'$0 verificado'}</span><span class="dot">${sel(m)?ic(I.check,14):''}</span></div>`;
+  const opt=m=>`<div class="card opt ${sel(m)?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}" style="padding:16px;border-radius:20px;min-height:82px"><div class="modeavatar" style="width:42px;height:42px;font-size:19px;background:${sel(m)?'linear-gradient(145deg,#6653ff,#377dff)':'#1b304c'}">✦</div><div class="grow"><div style="font-weight:750;white-space:normal">${esc(m.name)}</div><div class="muted sm" style="margin-top:4px">${esc(m.pn)} · ${esc(m.id)}</div><div style="margin-top:7px"><span class="badge g">${S.fromCache?'$0 guardado':'$0 verificado'}</span></div></div><span class="dot">${sel(m)?ic(I.check,14):''}</span></div>`;
   const checked=S.catalogAt?`Última comprobación: ${new Date(S.catalogAt).toLocaleString()}`:'Aún no se ha completado una comprobación';
   return `<h1>Modelos gratuitos</h1><div class="muted sm" style="margin-top:4px">Solo OpenCode Zen · precio cero verificado</div>
   <div class="note">Se comprueba el catálogo oficial y el precio de entrada, salida y caché. Si una fuente falla o un precio es desconocido, el modelo se excluye.</div>
-  <button class="btn p" id="refreshModels" style="margin-top:14px" ${S.refreshing?'disabled':''}>${S.refreshing?'Comprobando…':'↻ Actualizar modelos oficiales'}</button>
+  <input id="modelSearch" type="search" placeholder="Buscar modelo por nombre…" style="width:100%;margin-top:12px;min-height:48px;border:1px solid #2b4264;border-radius:16px;background:#0c1b30;color:var(--text);padding:0 14px;font:14px system-ui;outline:0"><button class="btn p" id="refreshModels" style="margin-top:10px" ${S.refreshing?'disabled':''}>${S.refreshing?'Comprobando…':'↻ Actualizar modelos oficiales'}</button>
   <div class="muted sm" style="margin:10px 2px">${esc(checked)}</div>
   ${S.catalogError?`<div class="note">${esc(S.catalogError)}</div>`:''}
-  <div class="list" style="margin-top:16px">${S.models.map(opt).join('')||'<div class="card empty muted">No hay modelos gratuitos verificados ahora mismo. Pulsa actualizar para intentarlo de nuevo.</div>'}</div>
+  <div class="muted sm" id="modelCount" style="margin-top:14px">${S.models.length} modelos disponibles</div><div class="list" id="modelList" style="margin-top:10px">${S.models.map(opt).join('')||'<div class="card empty muted">No hay modelos gratuitos verificados ahora mismo. Pulsa actualizar para intentarlo de nuevo.</div>'}</div>
   <a href="/" style="text-decoration:none"><button class="btn s" style="margin-top:18px;box-shadow:var(--sh)">Proveedores y ajustes avanzados</button></a>${nav('m')}`}
 
 /* ---------- Chat ---------- */
-function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel();
-  return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" id="ttl" style="font-size:16px;font-weight:700">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
-  <div class="chattools"><button id="agentMode">${S.agent==='plan'?'Plan':'Build'} ▾</button><select id="chatModel" aria-label="Modelo del chat"><option value="">Modelo actual</option>${S.models.map(x=>`<option value="${esc(x.p)}|${esc(x.id)}" ${S.model&&S.model.p===x.p&&S.model.id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select><button id="compact">/compact</button><button id="undo">/undo</button><button id="showDiff">Diff</button></div><div id="msgs"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div>
-  <div class="comp"><textarea id="inp" rows="1" placeholder="Escribe un mensaje…"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button></div></div>`}
+function modeInfo(){return S.agent==='plan'?{emoji:'🧭',title:'Modo Plan',sub:'Analiza y organiza antes de actuar'}:{emoji:'🛠️',title:'Modo Build',sub:'Programa, modifica y ejecuta tareas'}}
+function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel(),a=modeInfo();
+  return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" id="ttl" style="font-size:16px;font-weight:750">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'Selecciona un modelo')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
+  <div class="chatmode"><div class="modeavatar" id="modeAvatar">${a.emoji}</div><div class="modetext"><div class="modetitle" id="modeTitle">${a.title}</div><div class="modesub" id="modeSub">${a.sub}</div></div><select id="chatModel" aria-label="Modelo del chat"><option value="">Modelo actual</option>${S.models.map(x=>`<option value="${esc(x.p)}|${esc(x.id)}" ${S.model&&S.model.p===x.p&&S.model.id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
+  <div class="chattools"><button id="agentMode">${a.emoji} Cambiar modo</button><button id="compact">Compactar</button><button id="undo">Deshacer</button><button id="showDiff">Diff</button></div><div id="msgs" role="log" aria-live="polite"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div><div id="filelist" class="attachments hide"></div><div id="filehint" class="filehint hide"></div>
+  <div class="comp"><input id="fileInput" type="file" multiple accept="image/*,.zip,.txt,.md,.pdf,.json,.js,.ts,.tsx,.jsx,.html,.css,.kt,.py,.xml,.yaml,.yml,.toml,.log" hidden><button class="attach" id="attach" aria-label="Adjuntar imágenes o archivos">＋</button><textarea id="inp" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button></div></div>`}
 async function send(){
   const i=$('#inp');if(!i)return;
   if(S.busy){try{await api('/session/'+S.cur+'/abort',{method:'POST'})}catch(e){}setBusy(false);scheduleLoad(300);return}
-  const t=i.value.trim();if(!t)return;i.value='';i.style.height='auto';
+  const t=i.value.trim();if(!t&&!S.attachments.length)return;i.value='';i.style.height='auto';
   if(t==='/undo'){try{await api('/session/'+S.cur+'/undo',{method:'POST',headers:J,body:'{}'});scheduleLoad(150)}catch(e){S.requestError='No se pudo deshacer: '+String(e.message||e);paint()}return}
   if(t==='/compact'){try{await api('/session/'+S.cur+'/summarize',{method:'POST',headers:J,body:'{}'});scheduleLoad(200)}catch(e){S.requestError='No se pudo compactar: '+String(e.message||e);paint()}return}
-  const b={parts:[{type:'text',text:t}]};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};b.agent=S.agent;
+  const files=S.attachments.slice();const parts=[];if(t)parts.push({type:'text',text:t});for(const f of files)parts.push({type:'file',mime:f.mime,url:f.data,name:f.name});const b={parts};if(S.model)b.model={providerID:S.model.p,modelID:S.model.id};b.agent=S.agent;
   S.requestError='';setBusy(true);
-  S.msgs.push({info:{role:'user',sessionID:S.cur},parts:[{type:'text',text:t}]});R.stick=true;paint();
+  S.msgs.push({info:{role:'user',sessionID:S.cur},parts:[...(t?[{type:'text',text:t}]:[]),...files.map(f=>({type:'file',mime:f.mime,url:f.data,name:f.name}))]});S.attachments=[];drawAttachments();R.stick=true;paint();
   try{await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)});scheduleLoad(900)}
   catch(e){const k=S.msgs.findIndex(m=>m.info&&!m.info.id&&m.info.role==='user');if(k>=0)S.msgs.splice(k,1);
     setBusy(false);S.requestError='No se pudo enviar el mensaje: '+String(e.message||e);const x=$('#inp');if(x&&!x.value)x.value=t;paint()}}
 async function showDiff(){try{const d=await api('/session/'+S.cur+'/diff');const files=Array.isArray(d)?d:[];const html=files.map(f=>{const lines=String(f.diff||'').split('\n').map(line=>`<span class="${line.startsWith('+')?'add':line.startsWith('-')?'del':''}">${esc(line)}</span>`).join('');return `<div class="card" style="margin:8px 0"><b>${esc(f.file||f.path||'Archivo')}</b><div class="diff">${lines||'Sin diferencias disponibles'}</div></div>`}).join('')||'<div class="muted">OpenCode no devolvió diferencias para esta sesión.</div>';const dlog=document.createElement('div');dlog.className='modal';dlog.innerHTML=`<div class="card" style="max-height:82dvh;overflow:auto;width:min(94vw,560px)"><div class="row sp"><b>Diff de la sesión</b><button class="rb" id="closeDiff">×</button></div><div style="margin-top:12px">${html}</div><div class="muted sm" style="margin-top:10px">Para revertir un cambio usa /undo, que revierte el último mensaje de la sesión. La reversión por archivo aún no está disponible.</div></div>`;document.body.appendChild(dlog);dlog.querySelector('#closeDiff').onclick=()=>dlog.remove()}catch(e){S.requestError='No se pudieron cargar los diffs: '+String(e.message||e);paint()}}
+function guessMime(name){const ext=(name.split('.').pop()||'').toLowerCase();return ({png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',pdf:'application/pdf',zip:'application/zip',txt:'text/plain',md:'text/markdown',json:'application/json',html:'text/html',css:'text/css',js:'text/javascript',ts:'text/plain'})[ext]||'application/octet-stream'}
+function drawAttachments(){const box=$('#filelist'),hint=$('#filehint');if(!box)return;box.innerHTML='';box.classList.toggle('hide',!S.attachments.length);if(hint){hint.classList.toggle('hide',!S.attachments.length);hint.textContent='Adjuntos: hasta 6 archivos · 12 MB por archivo. ZIP se adjunta como archivo; el agente debe tener acceso a su contenido para analizarlo.'}S.attachments.forEach((f,n)=>{const e=document.createElement('div');e.className='filechip';e.innerHTML='<b>'+(f.mime.startsWith('image/')?'🖼️':'📎')+'</b><span>'+esc(f.name)+'</span><button type="button" aria-label="Quitar '+esc(f.name)+'">×</button>';e.querySelector('button').onclick=()=>{S.attachments.splice(n,1);drawAttachments()};box.appendChild(e)})}
 function bindChat(){
-  R={map:new Map(),raf:0,stick:true};permSig=null;qSig=null;
+  R={map:new Map(),raf:0,stick:true};permSig=null;qSig=null;S.attachments=[];drawAttachments();
   $('#bk').onclick=()=>{location.hash='#/'};
   $('#del').onclick=async()=>{if(await ask('¿Eliminar esta sesión?','Eliminar')){try{await api('/session/'+S.cur,{method:'DELETE'})}catch(e){}S.sessions=S.sessions.filter(s=>s.id!==S.cur);location.hash='#/'}};
   const i=$('#inp'),box=$('#msgs'),coarse=matchMedia('(pointer:coarse)').matches;
+  const fi=$('#fileInput'),ab=$('#attach');if(ab&&fi)ab.onclick=()=>fi.click();if(fi)fi.onchange=async()=>{const files=Array.from(fi.files||[]);for(const f of files){if(S.attachments.length>=6)break;if(f.size>12*1024*1024){S.requestError='Cada archivo debe pesar menos de 12 MB: '+f.name;continue}try{const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=reject;r.readAsDataURL(f)});S.attachments.push({name:f.name,mime:f.type||guessMime(f.name),size:f.size,data});}catch(e){S.requestError='No se pudo leer '+f.name}}fi.value='';drawAttachments()};
   i.oninput=()=>{i.style.height='auto';i.style.height=Math.min(i.scrollHeight,120)+'px'};
   i.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!coarse&&!e.isComposing){e.preventDefault();send()}};
   $('#go').onclick=send;
-  const am=$('#agentMode');if(am)am.onclick=()=>{S.agent=S.agent==='plan'?'build':'plan';st.set('agent',S.agent);am.textContent=(S.agent==='plan'?'Plan':'Build')+' ▾'};
+  const am=$('#agentMode');if(am)am.onclick=()=>{S.agent=S.agent==='plan'?'build':'plan';st.set('agent',S.agent);const a=modeInfo();am.textContent=a.emoji+' Cambiar modo';$('#modeAvatar').textContent=a.emoji;$('#modeTitle').textContent=a.title;$('#modeSub').textContent=a.sub};
   const cm=$('#chatModel');if(cm)cm.onchange=()=>{const [p,id]=cm.value.split('|');if(p&&id){S.model={p,id};st.set('model',S.model);const label=document.querySelector('.top .muted');if(label)label.textContent=(S.models.find(x=>x.p===p&&x.id===id)||{}).name||id}};
   const df=$('#showDiff');if(df)df.onclick=showDiff;
   const un=$('#undo');if(un)un.onclick=async()=>{try{await api('/session/'+S.cur+'/undo',{method:'POST',headers:J,body:'{}'});scheduleLoad(150)}catch(e){S.requestError='Undo no disponible: '+String(e.message||e);paint()}};
