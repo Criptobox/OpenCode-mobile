@@ -171,6 +171,32 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 .mf{display:flex;align-items:center;gap:2px;margin-top:8px;color:var(--muted)}.mb{border:0;background:none;color:inherit;min-height:32px;min-width:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;font:600 11px system-ui;padding:0 8px}.mb.on{color:var(--hi);background:var(--soft)}.mt{font-size:10px;color:var(--muted);margin-left:auto}.b.u .mt{color:inherit;opacity:.7;text-align:right;margin:4px 0 0}
 .comp{flex-wrap:wrap}.cfoot{flex:0 0 100%;display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);padding:0 8px 2px}.cfoot b{color:var(--ok);font-weight:600}
 @media(max-height:600px){.cfoot{display:none}}
+/* 0.11: animaciones, estados vacíos, errores claros y proyectos agrupados */
+.busy{align-self:flex-start;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:12px;color:var(--muted);box-shadow:var(--sh)}
+.busy .bt{font-variant-numeric:tabular-nums}.busy .bs{color:var(--ambert)}
+.dots i{display:inline-block;width:4px;height:4px;border-radius:50%;background:currentColor;margin-left:3px;opacity:.5}
+.errc{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:18px;background:var(--amber);border:1px solid var(--line);min-width:0}
+.errc .eb{min-width:0;flex:1}.errc .et{font-weight:700;color:var(--ambert);line-height:1.35}.errc .ed{font:11px ui-monospace,monospace;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.errc .btn{min-height:40px;margin-top:10px}
+.field{width:100%;min-height:48px;border:1px solid var(--line);border-radius:16px;background:var(--surf2);color:var(--text);padding:0 14px;font:14px system-ui;outline:0;margin:0 0 6px}.field:focus{border-color:var(--acc)}
+.gh{margin:20px 2px 10px;font:700 11px system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gl{display:flex;flex-direction:column;gap:10px}
+.swp{position:relative;border-radius:24px;overflow:hidden}
+.sacts{position:absolute;right:0;top:0;bottom:0;width:150px;display:flex;gap:6px;visibility:hidden}.swp.sw .sacts{visibility:visible}
+.sacts button{flex:1;border:0;border-radius:20px;font:700 12px system-ui;color:#fff;background:var(--acc)}.sacts .del{background:#E5484D}
+.card.srow{position:relative;touch-action:pan-y;background:var(--surf);cursor:pointer}
+@media(prefers-reduced-motion:no-preference){
+ #view.vin>*{animation:vin .28s cubic-bezier(.2,.8,.2,1) both}
+ #view.vin>*:nth-child(2){animation-delay:.04s}#view.vin>*:nth-child(3){animation-delay:.08s}#view.vin>*:nth-child(4){animation-delay:.12s}#view.vin>*:nth-child(5){animation-delay:.16s}#view.vin>*:nth-child(n+6){animation-delay:.2s}
+ @keyframes vin{from{opacity:0;transform:translateY(10px)}}
+ .ar{animation:in .18s ease-out}
+ .btn,.rb,.sugg,.mb,.card.srow{transition:transform .12s ease,background .15s ease}
+ .btn:active,.rb:active,.sugg:active,.mb:active{transform:scale(.96)}
+ .busy .mascot{animation:bob 1.4s ease-in-out infinite}
+ .dots i{animation:dt 1.2s infinite both}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+ @keyframes dt{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+ @keyframes bob{50%{transform:translateY(-3px) rotate(-4deg)}}
+}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7A62FF"/><stop offset="1" stop-color="#2FD6C5"/></linearGradient></defs></svg>
 <div id="view"></div>
@@ -340,9 +366,17 @@ const clock=t=>{try{return new Date(t).toLocaleTimeString([],{hour:'2-digit',min
 function msgFoot(info,p){const pid=esc(p.id||''),r=st.get('rate',{})[p.id||''];
   return '<div class="mf"><button type="button" class="mb" data-a="copy" data-m="'+esc(info.id||'')+'" data-p="'+pid+'" aria-label="Copiar respuesta">'+ic(I.copy,13)+'<span>Copiar</span></button><button type="button" class="mb'+(r===1?' on':'')+'" data-a="up" data-p="'+pid+'" aria-label="Respuesta útil">'+ic(I.up,14)+'</button><button type="button" class="mb'+(r===-1?' on':'')+'" data-a="down" data-p="'+pid+'" aria-label="Respuesta mejorable">'+ic(I.downv,14)+'</button>'+(info.time&&info.time.created?'<span class="mt">'+clock(info.time.created)+'</span>':'')+'</div>'}
 function copyText(t,ok){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>{});else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(x){}ta.remove()}}
+function errParts(msg){msg=String(msg||'');const i=msg.indexOf(': '),head=i>0?msg.slice(0,i):msg,detail=i>0?msg.slice(i+2):'';let text=head;
+  if(/ 401\b/.test(msg))text='El motor local rechazó la conexión. Cierra y abre la app.';
+  else if(/abort|timeout|timed out/i.test(msg))text=(i>0?head+'. ':'')+'El motor tardó demasiado en responder.';
+  else if(/Failed to fetch|NetworkError|Load failed|\b5\d\d\b|HTTP 5/i.test(msg))text=(i>0?head+'. ':'')+'El motor no responde.';
+  return{text,detail}}
+function errHtml(msg,btn){const e=errParts(msg);return mascot(34)+'<div class="eb"><div class="et">'+esc(e.text)+'</div>'+(e.detail?'<div class="ed">'+esc(e.detail)+'</div>':'')+(btn||'')+'</div>'}
+const emptyState=(t,sub,btn)=>'<div class="empty">'+mascot(64)+'<div style="font-weight:800;font-size:17px;margin-top:8px">'+esc(t)+'</div><div class="muted sm" style="margin-top:4px">'+esc(sub)+'</div>'+(btn?'<button type="button" class="btn p" data-newchat style="margin-top:14px;max-width:240px">'+esc(btn)+'</button>':'')+'</div>';
+let enterT=0;function enter(v){v.classList.remove('vin');void v.offsetWidth;v.classList.add('vin');clearTimeout(enterT);enterT=setTimeout(()=>v.classList.remove('vin'),500)}
 function items(){
   const out=[];let ui=0;
-  if(S.requestError)out.push({k:'err',cls:'note',html:esc(S.requestError)+'<br><button class="btn s" data-act="reload" style="margin-top:8px">Actualizar respuesta</button>'});
+  if(S.requestError)out.push({k:'err',cls:'errc',html:errHtml(S.requestError,'<button class="btn s" data-act="reload">Reintentar</button>')});
   S.msgs.forEach((m,i)=>{const info=m.info||{},ps=m.parts||[];
     if(info.role==='user'){const t=ps.filter(p=>p.type==='text'&&!p.synthetic).map(p=>p.text||'').join('\n');const tm=info.time&&info.time.created?'<div class="mt">'+clock(info.time.created)+'</div>':'';const fs=ps.filter(p=>p.type==='file').map(p=>{const n=esc(p.name||'Archivo adjunto'),mime=p.mime||'';return mime.startsWith('image/')&&p.url?'<div style="margin-top:8px"><img src="'+esc(p.url)+'" alt="'+n+'" style="display:block;max-width:100%;max-height:220px;border-radius:12px"></div>':'<div style="margin-top:7px;padding:8px 10px;border-radius:10px;background:#ffffff18;font-size:12px">📎 '+n+'</div>'}).join('');out.push({k:'u'+(ui++),cls:'b u',html:md(t)+fs+tm});return}
     ps.forEach((p,j)=>{const k=(info.id||'a'+i)+':'+(p.id||j);
@@ -352,8 +386,8 @@ function items(){
     if(info.error&&errText(info.error))out.push({k:(info.id||i)+':e',cls:'note',html:esc(errText(info.error))})});
   if(!S.loaded&&!S.msgs.length)out.push({k:'load',cls:'empty muted',html:'Cargando…'});
   else if(S.loaded&&!S.msgs.length)out.push({k:'empty',cls:'empty',html:mascot(84)+'<div style="font-size:21px;font-weight:800;letter-spacing:-.4px">¿En qué te ayudo?</div><div class="muted sm" style="margin-top:4px">Escribe abajo o elige una idea</div><div class="chips-w">'+suggBtns()+'</div>'});
-  if(S.busy){const s=S.busySince?Math.floor((Date.now()-S.busySince)/1000):0;
-    out.push({k:'busy',cls:'tool',html:(S.qs.some(x=>!x.sessionID||x.sessionID===S.cur)?'Esperando tu respuesta':'Generando · '+s+' s')+(S.lastProgress&&Date.now()-S.lastProgress>20000?' · sin novedades recientes':'')})}
+  if(S.busy){const wait=S.qs.some(x=>!x.sessionID||x.sessionID===S.cur),stale=S.lastProgress&&Date.now()-S.lastProgress>20000;
+    out.push({k:'busy',cls:'busy',html:mascot(28)+'<span>'+(wait?'Esperando tu respuesta':'Pensando')+'<span class="dots"><i></i><i></i><i></i></span></span><span class="bt" id="busyT"></span>'+(stale?'<span class="bs">sin novedades</span>':'')})}
   return out}
 function syncMsgs(){
   const box=$('#msgs');if(!box)return;
@@ -374,6 +408,7 @@ function syncMsgs(){
   // Mantener el anclaje: el streaming no desplaza al usuario si lee mensajes antiguos.
   if(near||R.stick){box.scrollTop=box.scrollHeight;if(S.loaded)R.stick=false}
   else {const delta=box.scrollHeight-beforeHeight;if(delta)box.scrollTop=Math.max(0,beforeTop+delta)}
+  const bt=$('#busyT');if(bt)bt.textContent=S.busySince?Math.floor((Date.now()-S.busySince)/1000)+' s':'';
   const dn=$('#down');if(dn)dn.classList.toggle('hide',box.scrollHeight-box.scrollTop-box.clientHeight<200)}
 function paint(){if(R.raf)return;R.raf=requestAnimationFrame(()=>{R.raf=0;syncMsgs();drawPerm();drawQ()})}
 
@@ -418,14 +453,14 @@ function route(){
   const h=location.hash||'#/',v=$('#view');
   if(h.startsWith('#/s/')){v.classList.add('chat-host');const id=decodeURIComponent(h.slice(4));
     if(S.shown!==id){S.shown=id;S.msgs=[];S.loaded=false;S.busy=false;S.busySince=0;S.requestError=''}
-    S.cur=id;v.style.padding='0';v.innerHTML=chatShell();bindChat();return}
-  v.classList.remove('chat-host');S.cur=null;S.shown=null;render();refreshSessions()}
+    S.cur=id;v.style.padding='0';enter(v);v.innerHTML=chatShell();bindChat();return}
+  v.classList.remove('chat-host');S.cur=null;S.shown=null;enter(v);render();refreshSessions()}
 function render(){
   const h=location.hash||'#/',v=$('#view');if(!v||S.cur)return;v.style.padding='28px 20px 110px';
   const open=e=>e.onclick=()=>location.hash='#/s/'+e.dataset.s;
   lastSig=sessSig();
   if(h==='#/settings'){v.innerHTML=settingsView();v.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{st.set('theme',b.dataset.th);applyTheme();render()});const ins=$('#installAppUpdate');if(ins)ins.onclick=()=>{const wrap=$('#updateProgressWrap');if(wrap)wrap.style.display='block';if(window.OpenCodeNative&&OpenCodeNative.installAppUpdate)OpenCodeNative.installAppUpdate();else alert('Actualizador nativo no disponible en esta compilación')};if(appUpdateAvailableTag)window.onAppUpdateAvailable(appUpdateAvailableTag);const up=$('#updateOC');if(up)up.onclick=()=>{if(window.OpenCodeNative&&OpenCodeNative.updateOpenCode)OpenCodeNative.updateOpenCode();else alert('Actualizador nativo no disponible en esta compilación')};const dg=$('#runDiagnostics');if(dg)dg.onclick=runDiagnostics;return}
-  if(h==='#/sessions'){v.innerHTML=sessionsView();v.querySelectorAll('[data-s]').forEach(open);const n=$('#new');if(n)n.onclick=newSession}
+  if(h==='#/sessions'){v.innerHTML=sessionsView();bindSessions(v);const n=$('#new');if(n)n.onclick=newSession}
   else if(h==='#/models'){v.innerHTML=modelsView();const r=$('#refreshModels');if(r)r.onclick=()=>loadModels(true);const bindModelCards=()=>v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);render()});bindModelCards();const search=$('#modelSearch');if(search)search.oninput=()=>{const q=search.value.trim().toLowerCase(),filtered=S.models.filter(x=>(x.name+' '+x.id+' '+x.pn).toLowerCase().includes(q));const list=$('#modelList');if(list)list.innerHTML=filtered.map(opt).join('')||'<div class="card empty muted">No hay coincidencias. Prueba otro nombre.</div>';const count=$('#modelCount');if(count)count.textContent=filtered.length+' de '+S.models.length+' modelos';bindModelCards()}}
   else{v.innerHTML=homeView();v.querySelectorAll('[data-s]').forEach(open);bindHome(v)}}
 async function checkHealth(){
@@ -445,20 +480,46 @@ function bindHome(v){
 const sessRow=s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`;
 function homeView(){const m=curModel(),count=S.sessions.length,ver=m&&S.models.some(x=>x.p===m.p&&x.id===m.id&&x.sourceVerified);
   return `<div class="row sp"><div style="font-size:18px;font-weight:800;letter-spacing:-.3px">OpenCode <span style="color:var(--hi)">Mobile</span></div><a class="rb" href="/" aria-label="Proveedores y ajustes avanzados">${ic(I.sliders,21)}</a></div>
-  ${S.err?`<div class="note">${esc(S.err)}</div>`:''}
+  ${S.err?`<div class="errc" style="margin-top:14px">${errHtml(S.err,'<button class="btn s" data-act="retryHome">Reintentar</button>')}</div>`:''}
   <div class="hh"><span class="pill">${ic(I.spark,14)} Asistente de código</span>
   <h1>Hola, ¿qué <span class="hl">construimos</span> hoy?</h1>${mascot(124)}
   <form class="hp" id="hform" autocomplete="off"><input id="hin" type="text" enterkeyhint="send" placeholder="Describe tu idea o pregunta…" aria-label="Describe tu idea"><button class="send" type="submit" aria-label="Empezar">${ic(I.send,20)}</button></form>
   <div class="sugg-row">${suggBtns()}</div></div>
   <div class="card health"><div class="ring" id="hRing"><div><span id="hNum">…</span><small>correctas</small></div></div><div class="hlist"><div><span>Motor</span><b id="hMotor"><i class="sdot"></i>Comprobando…</b></div><div><span>Modelo</span><b>${esc(m?m.name:'Sin elegir')}</b></div><div><span>Catálogo</span><b id="hCat">…</b></div><div><span>Sesiones</span><b>${count}</b></div></div></div>
   <div class="muted sm" style="margin:10px 4px 0;text-align:center">${ver?(S.fromCache?'Modelo gratuito (última verificación guardada)':'Modelo gratuito verificado'):'Elige un modelo en el catálogo oficial'}</div>
-  <h2>Recientes</h2><div class="list">${S.sessions.slice(0,4).map(sessRow).join('')||'<div class="card empty muted">Todavía no hay conversaciones. Escribe tu idea arriba para empezar.</div>'}</div>${nav('h')}`}
+  <h2>Recientes</h2><div class="list">${S.sessions.slice(0,4).map(sessRow).join('')||'<div class="card">'+emptyState('Aún no hay conversaciones','Escribe tu idea arriba para empezar.')+'</div>'}</div>${nav('h')}`}
 function appearanceCard(){let m='dark';try{m=JSON.parse(localStorage.getItem('theme'))||'dark'}catch(e){}
   const o=(k,l,bg)=>'<button type="button" class="swo'+(m===k?' on':'')+'" data-th="'+k+'" aria-pressed="'+(m===k)+'"><i style="background:'+bg+'"></i>'+l+'</button>';
   return '<div class="card"><b>Apariencia</b><div class="sw">'+o('dark','Oscuro','linear-gradient(#0A1730,#050D1A)')+o('light','Claro','linear-gradient(135deg,#D9E7FC,#E2F4EC)')+o('auto','Automático','linear-gradient(90deg,#0A1730 50%,#D9E7FC 50%)')+'</div><div class="muted sm" style="margin-top:10px">Automático sigue el modo de tu teléfono.</div></div>'}
 function settingsView(){return `<h1>Ajustes</h1><div class="muted sm" style="margin:6px 0 18px">Mantenimiento y diagnóstico del entorno local</div>${appearanceCard()}<div style="height:12px"></div><div class="card"><div class="row sp"><b>Actualizar OpenCode Mobile</b><span class="badge">Automático</span></div><div class="muted sm" style="margin:6px 0 10px">Busca la versión nueva del repositorio oficial, descarga la APK y muestra el progreso. Android pedirá confirmar la instalación por seguridad.</div><div id="appUpdateStatus" class="muted sm" style="margin:10px 0">Pulsa actualizar para comprobar si hay una versión nueva.</div><div id="updateProgressWrap" style="display:none;height:8px;border-radius:99px;background:var(--surf2);overflow:hidden;margin:10px 0 14px"><div id="updateProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#7b72ff,#43b6ff);transition:width .18s"></div></div><button class="btn p" id="installAppUpdate">Actualizar ahora</button></div><div class="card" style="margin-top:12px"><b>OpenCode instalado</b><div class="muted sm" style="margin:6px 0 14px">Actualiza el motor OpenCode dentro del entorno, sin borrar proyectos ni sesiones.</div><button class="btn p" id="updateOC">Actualizar OpenCode</button></div><div class="card" style="margin-top:12px"><div class="row sp"><b>Diagnóstico rápido</b><span class="badge">Solo lectura</span></div><div class="muted sm" style="margin:6px 0 12px">Comprueba la conexión con el motor, las sesiones y el catálogo de modelos. No modifica ni elimina archivos.</div><button class="btn s" id="runDiagnostics">Comprobar conexión</button><div id="diagResults" style="margin-top:12px"><div class="muted sm">Todavía no se ha ejecutado el diagnóstico.</div></div></div><div class="card" style="margin-top:12px"><b>Privacidad y archivos</b><div class="muted sm" style="margin-top:6px">El acceso a /sdcard depende de los permisos y carpetas que Android permita montar.</div></div>${nav('set')}`}
 async function runDiagnostics(){const out=$('#diagResults'),btn=$('#runDiagnostics');if(!out||!btn)return;btn.disabled=true;btn.textContent='Comprobando…';out.innerHTML='<div class="muted sm">Probando los servicios locales…</div>';const tests=[['Motor OpenCode','/config/providers'],['Sesiones','/session'],['Estado de sesiones','/session/status'],['Catálogo oficial de modelos','/m/zen-models']];const rows=[];for(const [label,path] of tests){const started=Date.now();try{const data=await api(path,{timeout:10000});if(data==null)throw new Error('Respuesta vacía');rows.push({label,ok:true,ms:Date.now()-started,detail:path===' /session'?'':Array.isArray(data)?data.length+' elementos':path==='/session'?data.length+' sesiones':path==='/config/providers'?'Configuración recibida':path==='/session/status'?'Estado recibido':'Catálogo recibido'})}catch(e){rows.push({label,ok:false,ms:Date.now()-started,detail:String(e.message||e)})}}const net=typeof navigator!=='undefined'&&navigator.onLine;const esState=typeof es!=='undefined'&&es?(es.readyState===1?'Conectado':es.readyState===0?'Reconectando':'Desconectado'):'No iniciado';const total=rows.filter(x=>x.ok).length;out.innerHTML=`<div class="row sp" style="margin-bottom:10px"><b>${total} de ${rows.length} comprobaciones correctas</b><span class="badge ${total===rows.length?'g':'r'}">${total===rows.length?'OK':'Revisar'}</span></div>${rows.map(x=>`<div class="row" style="align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><span style="color:${x.ok?'#45e2a3':'#ff8b96'};font-weight:800">${x.ok?'✓':'!'}</span><div class="grow"><div style="font-weight:650">${esc(x.label)}</div><div class="muted sm">${esc(x.detail)} · ${x.ms} ms</div></div></div>`).join('')}<div class="muted sm" style="border-top:1px solid var(--line);padding-top:10px">Red del dispositivo: ${net?'conectada':'sin conexión'} · Eventos en vivo: ${esc(esState)} · ${new Date().toLocaleTimeString()}</div>`;btn.disabled=false;btn.textContent='Repetir diagnóstico'}
-function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new" aria-label="Nueva">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 18px">Conversaciones y trabajos recientes</div><div class="list">${S.sessions.map(sessRow).join('')||'<div class="card empty muted">No hay proyectos todavía.</div>'}</div>${nav('p')}`}
+const PIN_ICO='M9 4h6l-1 6 3 3v2H7v-2l3-3zM12 15v5';
+function groupSessions(list){const pins=new Set(st.get('pins',[])),n=new Date(),t0=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime(),D=864e5,g=[['Fijados',[]],['Hoy',[]],['Ayer',[]],['Esta semana',[]],['Anteriores',[]]];
+  list.forEach(x=>{const u=(x.time||{}).updated||0;g[pins.has(x.id)?0:u>=t0?1:u>=t0-D?2:u>=t0-6*D?3:4][1].push(x)});return g.filter(x=>x[1].length)}
+const swRow=(x,pinned)=>{const id=esc(x.id);return `<div class="swp"><div class="sacts"><button type="button" data-pin="${id}">${pinned?'Quitar':'Fijar'}</button><button type="button" class="del" data-del="${id}">Eliminar</button></div><div class="card row srow" data-go="${id}"><div class="ico">${ic(pinned?PIN_ICO:I.chat,21)}</div><div class="grow"><div class="t">${esc(x.title||'Sesión nueva')}</div><div class="muted sm">${ago((x.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div></div>`};
+function sessListHtml(){const q=(S.sessQ||'').trim().toLowerCase(),pins=new Set(st.get('pins',[])),list=S.sessions.filter(x=>!q||String(x.title||'Sesión nueva').toLowerCase().includes(q));
+  if(!S.sessions.length)return '<div class="card">'+emptyState('Aún no hay proyectos','Empieza una conversación y aparecerá aquí.','Nueva conversación')+'</div>';
+  if(!list.length)return '<div class="card">'+emptyState('Sin coincidencias','Prueba con otra palabra.')+'</div>';
+  return groupSessions(list).map(g=>'<div class="gh">'+g[0]+'</div><div class="gl">'+g[1].map(x=>swRow(x,pins.has(x.id))).join('')+'</div>').join('')}
+function sessionsView(){return `<div class="row sp"><div><div class="muted sm">TU ESPACIO</div><h1>Mis proyectos</h1></div><button class="rb" id="new" aria-label="Nueva">${ic(I.plus,22)}</button></div><div class="muted sm" style="margin:8px 0 14px">${S.sessions.length} conversaciones · desliza una para fijarla o eliminarla</div><input class="field" id="sessSearch" type="search" placeholder="Buscar proyecto…" aria-label="Buscar proyecto" value="${esc(S.sessQ||'')}"><div id="sessList">${sessListHtml()}</div>${nav('p')}`}
+function bindSessions(v){
+  const box=$('#sessList'),inp=$('#sessSearch');if(!box)return;
+  const draw=()=>{box.innerHTML=sessListHtml();bindRows()};
+  if(inp)inp.oninput=()=>{S.sessQ=inp.value;draw()};
+  function bindRows(){box.querySelectorAll('.swp').forEach(w=>{
+    const row=w.querySelector('.srow'),W=150;let x0=0,y0=0,dx=0,drag=false,open=false,moved=false,lock='';
+    const set=(tx,anim)=>{row.style.transition=anim?'transform .2s ease':'none';if(tx<0)w.classList.add('sw');else setTimeout(()=>w.classList.remove('sw'),anim?220:0);row.style.transform=tx?'translateX('+tx+'px)':''};
+    row.addEventListener('pointerdown',e=>{x0=e.clientX;y0=e.clientY;dx=0;drag=true;moved=false;lock=''});
+    row.addEventListener('pointermove',e=>{if(!drag)return;dx=e.clientX-x0;const dy=e.clientY-y0;
+      if(!lock&&(Math.abs(dx)>8||Math.abs(dy)>8))lock=Math.abs(dx)>Math.abs(dy)?'x':'y';
+      if(lock!=='x')return;moved=true;try{row.setPointerCapture(e.pointerId)}catch(x){}
+      set(Math.max(-W,Math.min(0,(open?-W:0)+dx)),false)});
+    const end=()=>{if(!drag)return;drag=false;if(lock==='x'){open=(open?-W:0)+dx<-W/2;set(open?-W:0,true)}};
+    row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end);
+    row.addEventListener('click',()=>{if(moved){moved=false;return}if(open){open=false;set(0,true);return}location.hash='#/s/'+row.dataset.go})})
+    box.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{const id=b.dataset.pin,p=st.get('pins',[]),i=p.indexOf(id);if(i>=0)p.splice(i,1);else p.push(id);st.set('pins',p);draw()});
+    box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!await ask('¿Eliminar esta sesión?','Eliminar'))return;const id=b.dataset.del;try{await api('/session/'+id,{method:'DELETE'})}catch(e){}S.sessions=S.sessions.filter(x=>x.id!==id);lastSig=sessSig();render()})}
+  bindRows()}
 function modelsView(){
   const sel=m=>curModel()&&curModel().p===m.p&&curModel().id===m.id;
   const opt=m=>`<div class="card opt ${sel(m)?'sel':''}" data-m="${esc(m.p)}|${esc(m.id)}" style="padding:16px;border-radius:20px;min-height:82px"><div class="modeavatar" style="width:42px;height:42px;font-size:19px;background:${sel(m)?'linear-gradient(145deg,#6653ff,#377dff)':'var(--soft)'}">✦</div><div class="grow"><div style="font-weight:750;white-space:normal">${esc(m.name)}</div><div class="muted sm" style="margin-top:4px">${esc(m.pn)} · ${esc(m.id)}</div><div style="margin-top:7px"><span class="badge g">${S.fromCache?'$0 guardado':'$0 verificado'}</span></div></div><span class="dot">${sel(m)?ic(I.check,14):''}</span></div>`;
@@ -468,7 +529,7 @@ function modelsView(){
   <input id="modelSearch" type="search" placeholder="Buscar modelo por nombre…" style="width:100%;margin-top:12px;min-height:48px;border:1px solid var(--line);border-radius:16px;background:var(--code);color:var(--text);padding:0 14px;font:14px system-ui;outline:0"><button class="btn p" id="refreshModels" style="margin-top:10px" ${S.refreshing?'disabled':''}>${S.refreshing?'Comprobando…':'↻ Actualizar modelos oficiales'}</button>
   <div class="muted sm" style="margin:10px 2px">${esc(checked)}</div>
   ${S.catalogError?`<div class="note">${esc(S.catalogError)}</div>`:''}
-  <div class="muted sm" id="modelCount" style="margin-top:14px">${S.models.length} modelos disponibles</div><div class="list" id="modelList" style="margin-top:10px">${S.models.map(opt).join('')||'<div class="card empty muted">No hay modelos gratuitos verificados ahora mismo. Pulsa actualizar para intentarlo de nuevo.</div>'}</div>
+  <div class="muted sm" id="modelCount" style="margin-top:14px">${S.models.length} modelos disponibles</div><div class="list" id="modelList" style="margin-top:10px">${S.models.map(opt).join('')||'<div class="card">'+emptyState('Sin modelos gratuitos','No se pudo verificar ninguno ahora. Pulsa actualizar para reintentar.')+'</div>'}</div>
   <a href="/" style="text-decoration:none"><button class="btn s" style="margin-top:18px;box-shadow:var(--sh)">Proveedores y ajustes avanzados</button></a>${nav('m')}`}
 
 /* ---------- Chat ---------- */
@@ -579,7 +640,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)resync()})
 window.addEventListener('online',resync);
 // Red de seguridad mientras se genera: reloj "Generando · N s" y recarga si llevan >8 s sin eventos.
 setInterval(()=>{if(S.cur&&S.busy){paint();if(Date.now()-S.lastEvent>8000){loadMsgs();checkStatus()}}},1000);
-document.addEventListener('click',e=>{if(e.target.closest('[data-newchat]'))newSession()});
+document.addEventListener('click',e=>{if(e.target.closest('[data-newchat]'))newSession();const r=e.target.closest('[data-act=retryHome]');if(r){S.err='';loadSessions().catch(()=>{});loadModels(true)}});
 window.onhashchange=route;
 connect();
 (async()=>{try{await Promise.all([loadModels(),loadSessions()])}catch(e){S.err=/ 401/.test(String(e&&e.message))?'Sin autorización con el servidor local. Cierra y abre la app.':'No pude cargar datos del servidor'}route()})();

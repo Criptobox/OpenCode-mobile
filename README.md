@@ -152,3 +152,10 @@ Validación de esta entrega: comprobación de sintaxis JavaScript y estructura Z
 - Todos los colores de la interfaz pasan a variables CSS, así que cualquier pantalla respeta el tema.
 - Inicio: anillo de salud del entorno (motor, sesiones, estado y catálogo) que se comprueba al abrir, como máximo una vez por minuto.
 - Chat: avatar del asistente, hora en cada mensaje, botón Copiar, valoración 👍/👎 (se guarda solo en el teléfono) y pie con el modelo activo.
+
+## 0.11.0 — animaciones, estados vacíos y proyectos
+- Transición suave al cambiar de pantalla y retroalimentación al pulsar botones (se desactiva con "reducir movimiento").
+- Mientras el asistente trabaja, la mascota se mueve con un indicador "Pensando…" y el contador de segundos.
+- Errores en lenguaje claro con mascota y botón Reintentar; el detalle técnico queda en letra pequeña.
+- Estados vacíos con mascota en proyectos, inicio y modelos.
+- Proyectos agrupados (Fijados, Hoy, Ayer, Esta semana, Anteriores), con buscador y gestos: desliza una fila para fijarla o eliminarla. Los fijados se guardan solo en el teléfono.
