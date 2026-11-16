@@ -197,6 +197,9 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
  @keyframes dt{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
  @keyframes bob{50%{transform:translateY(-3px) rotate(-4deg)}}
 }
+.sugg.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.tf{margin-bottom:14px}.tfc{justify-content:flex-start!important;margin-top:8px}
+.swc{width:38px;height:38px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px var(--line);flex:none;padding:0}.swc.on{border-color:var(--bg);box-shadow:0 0 0 3px var(--acc)}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7A62FF"/><stop offset="1" stop-color="#2FD6C5"/></linearGradient></defs></svg>
 <div id="view"></div>
@@ -241,8 +244,8 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10',down:'M12 5v14M6 13l6 6 6-6',sliders:'M4 7h9M17 7h3M4 17h3M11 17h9M15 4v6M9 14v6',spark:'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',copy:'M9 9h10v11H9zM5 15V4h10',up:'M7 11v9H4v-9zM7 11l4-7c2 0 2 2 2 4h6l-1 9H7',downv:'M7 13V4H4v9zM7 13l4 7c2 0 2-2 2-4h6l-1-9H7'};
 const mascot=(n=120)=>`<svg class="mascot" width="${n}" height="${n}" viewBox="0 0 120 120" aria-hidden="true"><path d="M34 86l-12 22 32-16z" fill="#4F8BEA"/><rect x="8" y="12" width="104" height="80" rx="40" fill="url(#mg)"/><rect x="18" y="22" width="84" height="60" rx="30" fill="#0A1224"/><rect x="39" y="41" width="11" height="23" rx="5.5" fill="#5EF2FF"/><rect x="70" y="41" width="11" height="23" rx="5.5" fill="#5EF2FF"/><circle cx="101" cy="21" r="14" fill="#fff"/><path d="M101 14v14M94 21h14" stroke="#19C3B2" stroke-width="4.5" stroke-linecap="round"/></svg>`;
-const SUG=[['Crear una web','Quiero crear una página web. Hazme las preguntas necesarias y empieza.'],['Explicar un error','Tengo un error en mi código y quiero que me ayudes a entenderlo y arreglarlo.'],['Revisar mi código','Revisa el código de este proyecto y dime qué se puede mejorar.'],['Hacer un script','Quiero que escribas un script que automatice una tarea. Pregúntame cuál.']];
-const suggBtns=()=>SUG.map(s=>`<button type="button" class="sugg" data-sugg="${esc(s[1])}">${esc(s[0])}</button>`).join('');
+const SUG=[['Crear una web','Quiero crear una página web. Hazme las preguntas necesarias y empieza.','web'],['Explicar un error','Tengo un error en mi código y quiero que me ayudes a entenderlo y arreglarlo.'],['Revisar mi código','Revisa el código de este proyecto y dime qué se puede mejorar.'],['Hacer un script','Quiero que escribas un script que automatice una tarea. Pregúntame cuál.']];
+const suggBtns=()=>SUG.map(s=>`<button type="button" class="sugg" data-sugg="${esc(s[1])}"${s[2]?' data-tpl="'+s[2]+'"':''}>${esc(s[0])}</button>`).join('');
 const errText=e=>e?String((e.data&&e.data.message)||e.message||e.name||''):'';
 
 /* ---------- Markdown ligero (código protegido, sin HTML crudo) ---------- */
@@ -463,6 +466,24 @@ function render(){
   if(h==='#/sessions'){v.innerHTML=sessionsView();bindSessions(v);const n=$('#new');if(n)n.onclick=newSession}
   else if(h==='#/models'){v.innerHTML=modelsView();const r=$('#refreshModels');if(r)r.onclick=()=>loadModels(true);const bindModelCards=()=>v.querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const[p,id]=e.dataset.m.split('|');S.model={p,id};st.set('model',S.model);render()});bindModelCards();const search=$('#modelSearch');if(search)search.oninput=()=>{const q=search.value.trim().toLowerCase(),filtered=S.models.filter(x=>(x.name+' '+x.id+' '+x.pn).toLowerCase().includes(q));const list=$('#modelList');if(list)list.innerHTML=filtered.map(opt).join('')||'<div class="card empty muted">No hay coincidencias. Prueba otro nombre.</div>';const count=$('#modelCount');if(count)count.textContent=filtered.length+' de '+S.models.length+' modelos';bindModelCards()}}
   else{v.innerHTML=homeView();v.querySelectorAll('[data-s]').forEach(open);bindHome(v)}}
+/* ---------- Plantillas: asistente corto que arma un buen prompt ---------- */
+const TPL={web:{title:'Crear una web',sub:'Elige cómo la quieres y yo la construyo.',cta:'Crear mi web',note:'Cuéntame de qué trata (opcional)',ph:'Ej.: una cafetería en Lima con menú y horarios',
+  fields:[{k:'tipo',l:'¿Qué tipo de sitio?',o:['Página de presentación','Portafolio','Tienda en línea','Blog','Restaurante o cafetería','Evento o invitación']},
+    {k:'estilo',l:'Estilo',o:['Minimalista','Colorido','Oscuro y moderno','Elegante']},
+    {k:'color',l:'Color principal',sw:1,o:[['violeta','#6554FF'],['azul','#2F8CFF'],['verde','#12A874'],['naranja','#FF8A3D'],['rosa','#E8478B']]}],
+  build:(a,n)=>'Crea un sitio web de tipo "'+a.tipo+'" con estilo '+a.estilo.toLowerCase()+' y color principal '+a.color[0]+' ('+a.color[1]+').'+(n?' Trata de: '+n+'.':'')+' Hazlo con HTML, CSS y JavaScript sin dependencias, que se vea bien en el móvil, y guárdalo en archivos del proyecto empezando por index.html. No me hagas más preguntas salvo que sea imprescindible.'}};
+function startFromPrompt(t){if(S.cur){const i=$('#inp');if(i){i.value=t;send()}}else{S.pendingPrompt=t;newSession()}}
+function openTemplate(key){const t=TPL[key];if(!t)return;const prev=document.querySelector('.model-picker');if(prev)prev.remove();
+  const saved=st.get('tpl_'+key,{}),sel={};t.fields.forEach(f=>{sel[f.k]=Math.min(+saved[f.k]||0,f.o.length-1)});
+  const wrap=document.createElement('div');wrap.className='model-picker';
+  const fh=f=>'<div class="tf"><div class="qh">'+esc(f.l)+'</div><div class="chips-w tfc" data-f="'+f.k+'">'+f.o.map((o,i)=>f.sw?'<button type="button" class="swc" data-i="'+i+'" style="background:'+o[1]+'" aria-label="'+esc(o[0])+'"></button>':'<button type="button" class="sugg" data-i="'+i+'">'+esc(o)+'</button>').join('')+'</div></div>';
+  wrap.innerHTML='<section class="model-sheet" role="dialog" aria-modal="true" aria-label="'+esc(t.title)+'"><div class="model-sheet-head"><div><div style="font-size:21px;font-weight:800;letter-spacing:-.4px">'+esc(t.title)+'</div><div class="muted sm" style="margin-top:3px">'+esc(t.sub)+'</div></div><button class="rb" type="button" id="tplClose" aria-label="Cerrar">×</button></div><div class="model-sheet-list">'+t.fields.map(fh).join('')+'<div class="tf"><div class="qh">'+esc(t.note)+'</div><textarea class="field" id="tplNote" rows="2" placeholder="'+esc(t.ph)+'" style="padding:12px 14px;min-height:72px;resize:none"></textarea></div></div><button class="btn p" type="button" id="tplGo" style="flex:none;margin-top:6px">'+esc(t.cta)+'</button></section>';
+  document.body.appendChild(wrap);
+  const sync=()=>wrap.querySelectorAll('[data-f]').forEach(g=>g.querySelectorAll('[data-i]').forEach(b=>{const on=+b.dataset.i===sel[g.dataset.f];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)}));
+  sync();
+  wrap.onclick=e=>{if(e.target===wrap){wrap.remove();return}const b=e.target.closest('[data-i]');if(b){sel[b.closest('[data-f]').dataset.f]=+b.dataset.i;sync()}};
+  wrap.querySelector('#tplClose').onclick=()=>wrap.remove();
+  wrap.querySelector('#tplGo').onclick=()=>{const a={};t.fields.forEach(f=>{a[f.k]=f.o[sel[f.k]]});st.set('tpl_'+key,sel);const note=wrap.querySelector('#tplNote').value.trim();wrap.remove();startFromPrompt(t.build(a,note))}}
 async function checkHealth(){
   const paths=['/config/providers','/session','/session/status','/m/zen-models'];
   const r=await Promise.all(paths.map(x=>api(x,{timeout:8000}).then(d=>d!=null,()=>false)));
@@ -476,7 +497,7 @@ function bindHome(v){
   if(S.health)paintHealth();if(!S.health||Date.now()-S.health.at>60000)checkHealth();
   const f=$('#hform'),i=$('#hin');if(!f||!i)return;
   f.onsubmit=e=>{e.preventDefault();const t=i.value.trim();if(!t){i.focus();return}S.pendingPrompt=t;newSession()};
-  v.querySelectorAll('[data-sugg]').forEach(b=>b.onclick=()=>{i.value=b.dataset.sugg;i.focus()})}
+  v.querySelectorAll('[data-sugg]').forEach(b=>b.onclick=()=>{if(b.dataset.tpl){openTemplate(b.dataset.tpl);return}i.value=b.dataset.sugg;i.focus()})}
 const sessRow=s=>`<div class="card row" data-s="${esc(s.id)}"><div class="ico">${ic(I.chat,21)}</div><div class="grow"><div class="t">${esc(s.title||'Sesión nueva')}</div><div class="muted sm">${ago((s.time||{}).updated||Date.now())}</div></div>${ic(I.back,18)}</div>`;
 function homeView(){const m=curModel(),count=S.sessions.length,ver=m&&S.models.some(x=>x.p===m.p&&x.id===m.id&&x.sourceVerified);
   return `<div class="row sp"><div style="font-size:18px;font-weight:800;letter-spacing:-.3px">OpenCode <span style="color:var(--hi)">Mobile</span></div><a class="rb" href="/" aria-label="Proveedores y ajustes avanzados">${ic(I.sliders,21)}</a></div>
@@ -607,7 +628,7 @@ function bindChat(){
     if(ab){const a=ab.dataset.a,pid=ab.dataset.p;
       if(a==='copy'){const mm=S.msgs.find(x=>x.info&&x.info.id===ab.dataset.m),pt=mm&&(mm.parts||[]).find(x=>x.id===pid),t=pt?pt.text:(ab.closest('.b')||{}).textContent||'';copyText(t,()=>{const sp=ab.querySelector('span');if(sp){sp.textContent='Copiado';setTimeout(()=>{sp.textContent='Copiar'},1200)}})}
       else{const r=st.get('rate',{}),v=a==='up'?1:-1;if(r[pid]===v)delete r[pid];else r[pid]=v;st.set('rate',r);paint()}return}
-    const sg=e.target.closest('[data-sugg]');if(sg){i.value=sg.dataset.sugg;send();return}
+    const sg=e.target.closest('[data-sugg]');if(sg){if(sg.dataset.tpl){openTemplate(sg.dataset.tpl);return}i.value=sg.dataset.sugg;send();return}
     if(e.target.dataset&&e.target.dataset.act==='reload'){S.requestError='';loadMsgs()}};
   syncMsgs();loadMsgs();loadPerms();loadQs();checkStatus();resizeComposer();
   if(S.pendingPrompt){const t=S.pendingPrompt;S.pendingPrompt='';i.value=t;send()}}

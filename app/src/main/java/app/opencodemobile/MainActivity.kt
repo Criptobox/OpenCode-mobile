@@ -59,6 +59,8 @@ class MainActivity : Activity() {
     private lateinit var web: WebView
     private lateinit var setup: View
     private lateinit var status: TextView
+    private lateinit var stepView: TextView
+    private lateinit var detailsToggle: TextView
     private lateinit var logView: TextView
     private lateinit var scroll: ScrollView
     private lateinit var retry: Button
@@ -114,8 +116,17 @@ class MainActivity : Activity() {
             setPadding(dp(20), dp(56), dp(20), dp(24))
             setBackgroundColor(getColor(R.color.bg))
         }
+        col.addView(android.widget.ImageView(this).apply {
+            setImageResource(R.drawable.ic_mascot)
+        }, LinearLayout.LayoutParams(dp(96), dp(96)).apply { bottomMargin = dp(12) })
         col.addView(TextView(this).apply {
-            text = "OpenCode"; textSize = 28f
+            val full = "OpenCode Mobile"
+            val sp = android.text.SpannableString(full)
+            sp.setSpan(
+                android.text.style.ForegroundColorSpan(getColor(R.color.accent)),
+                "OpenCode ".length, full.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            text = sp; textSize = 28f
             setTypeface(typeface, Typeface.BOLD)
             setTextColor(getColor(R.color.text))
         })
@@ -139,11 +150,26 @@ class MainActivity : Activity() {
             progressBackgroundTintList = ColorStateList.valueOf(getColor(R.color.bg))
         }
         pct = TextView(this).apply { text = ""; textSize = 12f; setTextColor(getColor(R.color.muted)) }
+        stepView = TextView(this).apply {
+            text = "Preparando…"; textSize = 13f
+            setTextColor(getColor(R.color.muted))
+        }
+        detailsToggle = TextView(this).apply {
+            text = "Ver detalles"; textSize = 13f
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(getColor(R.color.accent))
+            setPadding(0, dp(10), 0, dp(10))
+            setOnClickListener {
+                val show = scroll.visibility != View.VISIBLE
+                scroll.visibility = if (show) View.VISIBLE else View.GONE
+                text = if (show) "Ocultar detalles" else "Ver detalles"
+            }
+        }
         logView = TextView(this).apply {
             typeface = Typeface.MONOSPACE; textSize = 11f
             setTextColor(getColor(R.color.muted))
         }
-        scroll = ScrollView(this).apply { addView(logView) }
+        scroll = ScrollView(this).apply { addView(logView); visibility = View.GONE }
         retry = Button(this).apply {
             text = "Reintentar"; visibility = View.GONE
             setTextColor(Color.WHITE)
@@ -151,8 +177,10 @@ class MainActivity : Activity() {
             setOnClickListener { start() }
         }
         card.addView(status)
+        card.addView(stepView, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(4) })
         card.addView(bar, LinearLayout.LayoutParams(-1, dp(12)).apply { topMargin = dp(14) })
-        card.addView(pct, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(6); bottomMargin = dp(10) })
+        card.addView(pct, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(6); bottomMargin = dp(4) })
+        card.addView(detailsToggle)
         card.addView(scroll, LinearLayout.LayoutParams(-1, dp(200)))
         card.addView(retry, LinearLayout.LayoutParams(-1, dp(48)).apply { topMargin = dp(12) })
         col.addView(card, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(24) })
@@ -417,11 +445,12 @@ class MainActivity : Activity() {
                             bar.isIndeterminate = false
                             bar.progress = p
                             status.text = msg
+                            stepView.text = stepLabel(p)
                             pct.text = "${p / 10}%"
                         }
                     }, { appendLog(it) })
                 }
-                ui.post { bar.isIndeterminate = true; pct.text = "" }
+                ui.post { bar.isIndeterminate = true; pct.text = ""; stepView.text = "Arrancando el motor" }
                 setStatus("Iniciando OpenCode…")
                 startForegroundService(Intent(this, RuntimeService::class.java))
                 val t0 = System.currentTimeMillis()
@@ -439,10 +468,19 @@ class MainActivity : Activity() {
         }.start()
     }
 
+    private fun stepLabel(p: Int) = when {
+        p < 250 -> "Paso 1 de 3 · Preparando el sistema"
+        p < 950 -> "Paso 2 de 3 · Descargando OpenCode"
+        else -> "Paso 3 de 3 · Terminando la instalación"
+    }
+
     private fun fail(e: Throwable) {
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         showSetup()
-        status.text = "Algo falló"
+        status.text = "Algo salió mal"
+        stepView.text = "Revisa tu conexión y pulsa Reintentar. El progreso se conserva."
+        scroll.visibility = View.VISIBLE
+        detailsToggle.text = "Ocultar detalles"
         bar.visibility = View.GONE
         retry.visibility = View.VISIBLE
         appendLog("ERROR: ${e.message}\n${rt.tailLog(15)}")

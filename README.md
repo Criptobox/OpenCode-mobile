@@ -159,3 +159,8 @@ Validación de esta entrega: comprobación de sintaxis JavaScript y estructura Z
 - Errores en lenguaje claro con mascota y botón Reintentar; el detalle técnico queda en letra pequeña.
 - Estados vacíos con mascota en proyectos, inicio y modelos.
 - Proyectos agrupados (Fijados, Hoy, Ayer, Esta semana, Anteriores), con buscador y gestos: desliza una fila para fijarla o eliminarla. Los fijados se guardan solo en el teléfono.
+
+## 0.12.0 — plantillas y pantalla de instalación
+- "Crear una web" abre un asistente corto (tipo de sitio, estilo, color y una nota opcional) que arma el prompt y arranca la sesión. Recuerda tu última elección. Funciona desde el inicio y desde un chat vacío.
+- Pantalla de instalación nativa con la mascota, título en dos tonos, paso actual (1 a 3 de 3), colores del nuevo diseño en claro y oscuro, y el registro técnico plegado tras "Ver detalles" (se abre solo si algo falla).
+- Nota: los cambios nativos (Kotlin y recursos) no se compilaron en el entorno de desarrollo; compila con GitHub Actions y revisa la pantalla de instalación en el teléfono.
