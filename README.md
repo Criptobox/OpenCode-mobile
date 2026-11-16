@@ -146,3 +146,9 @@ Validación de esta entrega: comprobación de sintaxis JavaScript y estructura Z
 - Panel de estado (Motor, Modelo, Sesiones) en lugar de las 4 tarjetas de acceso.
 - Barra inferior flotante con botón central ✦ para nueva conversación.
 - Chat vacío con mascota y chips de sugerencia.
+
+## 0.10.0 — tema claro y chat con más detalle
+- Tema Oscuro, Claro pastel o Automático (sigue al teléfono) en Ajustes > Apariencia. La elección se guarda y también ajusta la barra de estado y el fondo del WebView.
+- Todos los colores de la interfaz pasan a variables CSS, así que cualquier pantalla respeta el tema.
+- Inicio: anillo de salud del entorno (motor, sesiones, estado y catálogo) que se comprueba al abrir, como máximo una vez por minuto.
+- Chat: avatar del asistente, hora en cada mensaje, botón Copiar, valoración 👍/👎 (se guarda solo en el teléfono) y pie con el modelo activo.

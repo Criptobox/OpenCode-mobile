@@ -70,7 +70,8 @@ class MainActivity : Activity() {
     private var fileCb: ValueCallback<Array<Uri>>? = null
     private var speechRecognizer: SpeechRecognizer? = null
     private var voicePending = false
-    private val webBg = Color.parseColor("#050D1A")
+    private var webBg = Color.parseColor("#050D1A")
+    private var webLight = false
     private val updatePrefs by lazy { getSharedPreferences("app_updates", MODE_PRIVATE) }
     private val updateChannel = "app_updates"
     private val updateRepo = "Criptobox/OpenCode-mobile"
@@ -206,6 +207,14 @@ class MainActivity : Activity() {
         }
         addJavascriptInterface(object {
             @JavascriptInterface fun taskFinished(title: String) { ui.post { RuntimeService.notifyTaskFinished(this@MainActivity, title.take(100)) } }
+            @JavascriptInterface fun setTheme(light: Boolean) {
+                ui.post {
+                    webLight = light
+                    webBg = Color.parseColor(if (light) "#E9EFFB" else "#050D1A")
+                    setBackgroundColor(webBg)
+                    if (web.visibility == View.VISIBLE) applyBars(true)
+                }
+            }
             @JavascriptInterface fun startVoiceInput() { ui.post { startVoiceInputNative() } }
             @JavascriptInterface fun stopVoiceInput() { ui.post { stopVoiceInputNative() } }
             @JavascriptInterface fun checkAppUpdateNow() {
@@ -380,7 +389,7 @@ class MainActivity : Activity() {
         val c = if (webUi) webBg else getColor(R.color.bg)
         window.statusBarColor = c
         window.navigationBarColor = c
-        val light = !webUi && !night
+        val light = if (webUi) webLight else !night
         window.decorView.systemUiVisibility =
             if (light) View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR else 0
     }
