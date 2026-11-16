@@ -140,3 +140,9 @@ Validación de esta entrega: comprobación de sintaxis JavaScript y estructura Z
 - Descarga a archivo temporal y renombrado solo al terminar; rechaza archivos pequeños/incompletos.
 - Android sigue mostrando su confirmación del instalador; no se puede instalar silenciosamente con una APK normal.
 - Requiere que el repositorio oficial de releases se configure una vez al preparar la app; el usuario final no debe tener que escribirlo cuando ese dato esté fijado por el desarrollador.
+
+## 0.9.0 — inicio renovado
+- Inicio con un solo foco: titular, mascota, cuadro "Describe tu idea…" que crea la sesión y envía el mensaje, y chips de sugerencia.
+- Panel de estado (Motor, Modelo, Sesiones) en lugar de las 4 tarjetas de acceso.
+- Barra inferior flotante con botón central ✦ para nueva conversación.
+- Chat vacío con mascota y chips de sugerencia.
