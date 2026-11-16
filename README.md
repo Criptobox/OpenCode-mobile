@@ -164,3 +164,9 @@ Validación de esta entrega: comprobación de sintaxis JavaScript y estructura Z
 - "Crear una web" abre un asistente corto (tipo de sitio, estilo, color y una nota opcional) que arma el prompt y arranca la sesión. Recuerda tu última elección. Funciona desde el inicio y desde un chat vacío.
 - Pantalla de instalación nativa con la mascota, título en dos tonos, paso actual (1 a 3 de 3), colores del nuevo diseño en claro y oscuro, y el registro técnico plegado tras "Ver detalles" (se abre solo si algo falla).
 - Nota: los cambios nativos (Kotlin y recursos) no se compilaron en el entorno de desarrollo; compila con GitHub Actions y revisa la pantalla de instalación en el teléfono.
+
+## 0.13.0 — vista previa
+- Cuando el asistente crea archivos HTML, CSS o JS en una sesión, aparece el botón "Vista previa" en el chat.
+- Abre la página dentro de la app, en un iframe aislado (sin acceso al servidor local ni a los datos de la app), en modo Móvil o Completo. Si hay varias páginas HTML puedes elegir cuál ver.
+- Lee la versión actual de los archivos con la API de OpenCode y, si no responde, usa el contenido que el asistente escribió. Los `style.css` y `.js` locales se incrustan en la página.
+- Límites: el código de la página no tiene almacenamiento local (`localStorage`) por el aislamiento, y las páginas que dependen de un servidor o de una compilación (por ejemplo React con build) no se verán.

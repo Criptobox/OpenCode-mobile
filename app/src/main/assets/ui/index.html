@@ -200,6 +200,13 @@ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
 .sugg.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .tf{margin-bottom:14px}.tfc{justify-content:flex-start!important;margin-top:8px}
 .swc{width:38px;height:38px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px var(--line);flex:none;padding:0}.swc.on{border-color:var(--bg);box-shadow:0 0 0 3px var(--acc)}
+.pv{position:fixed;inset:0;z-index:60;background:var(--bgimg),var(--bg);display:flex;flex-direction:column}
+.pvh{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;flex:none}
+.pvh b{font-size:15px}.pvh select{max-width:100%;margin-top:2px;border:1px solid var(--line);background:var(--surf2);color:var(--text);border-radius:10px;font:600 12px system-ui;padding:4px 8px}
+.pvb{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start;padding:0 10px calc(10px + env(safe-area-inset-bottom))}
+.pvb iframe{border:1px solid var(--line);border-radius:18px;background:#fff;width:100%;height:100%;box-shadow:var(--sh)}.pvb iframe.m{max-width:390px}
+.seg2{display:flex;padding:3px;border-radius:999px;background:var(--surf2);border:1px solid var(--line);flex:none}.seg2 button{border:0;background:none;color:var(--muted);font:600 11px system-ui;padding:7px 11px;border-radius:999px}.seg2 button.on{background:var(--acc);color:#fff}
+.chattools button.pvbtn{display:inline-flex;align-items:center;gap:6px;background:var(--acc);border-color:var(--acc);color:#fff}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7A62FF"/><stop offset="1" stop-color="#2FD6C5"/></linearGradient></defs></svg>
 <div id="view"></div>
@@ -242,7 +249,7 @@ window.onAppUpdateResult=function(msg){const el=document.getElementById('appUpda
 window.onAppUpdateProgress=function(percent,msg){const el=document.getElementById('appUpdateStatus');if(el)el.textContent=msg;const wrap=document.getElementById('updateProgressWrap'),bar=document.getElementById('updateProgressBar');if(wrap)wrap.style.display='block';if(bar)bar.style.width=Math.max(0,Math.min(100,percent))+'%';};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ic=(d,n=22)=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10',down:'M12 5v14M6 13l6 6 6-6',sliders:'M4 7h9M17 7h3M4 17h3M11 17h9M15 4v6M9 14v6',spark:'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',copy:'M9 9h10v11H9zM5 15V4h10',up:'M7 11v9H4v-9zM7 11l4-7c2 0 2 2 2 4h6l-1 9H7',downv:'M7 13V4H4v9zM7 13l4 7c2 0 2-2 2-4h6l-1-9H7'};
+const I={home:'M3 11l9-7 9 7v9H3z',star:'M12 3l2.5 6 6.5.5-5 4.3 1.6 6.4L12 16.5 6.4 20.2 8 13.8 3 9.5 9.5 9z',cls:'M4 5h16v14H4zM8 10l3 2-3 2M13 15h4',back:'M15 5l-7 7 7 7',send:'M5 12h14M13 6l6 6-6 6',stop:'M7 7h10v10H7z',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',chat:'M4 5h16v11H9l-5 4z',plus:'M12 5v14M5 12h14',check:'M5 12l4 4 10-10',down:'M12 5v14M6 13l6 6 6-6',sliders:'M4 7h9M17 7h3M4 17h3M11 17h9M15 4v6M9 14v6',spark:'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',copy:'M9 9h10v11H9zM5 15V4h10',refresh:'M20 12a8 8 0 11-2.3-5.7M20 4v5h-5',play:'M7 5l12 7-12 7z',up:'M7 11v9H4v-9zM7 11l4-7c2 0 2 2 2 4h6l-1 9H7',downv:'M7 13V4H4v9zM7 13l4 7c2 0 2-2 2-4h6l-1-9H7'};
 const mascot=(n=120)=>`<svg class="mascot" width="${n}" height="${n}" viewBox="0 0 120 120" aria-hidden="true"><path d="M34 86l-12 22 32-16z" fill="#4F8BEA"/><rect x="8" y="12" width="104" height="80" rx="40" fill="url(#mg)"/><rect x="18" y="22" width="84" height="60" rx="30" fill="#0A1224"/><rect x="39" y="41" width="11" height="23" rx="5.5" fill="#5EF2FF"/><rect x="70" y="41" width="11" height="23" rx="5.5" fill="#5EF2FF"/><circle cx="101" cy="21" r="14" fill="#fff"/><path d="M101 14v14M94 21h14" stroke="#19C3B2" stroke-width="4.5" stroke-linecap="round"/></svg>`;
 const SUG=[['Crear una web','Quiero crear una página web. Hazme las preguntas necesarias y empieza.','web'],['Explicar un error','Tengo un error en mi código y quiero que me ayudes a entenderlo y arreglarlo.'],['Revisar mi código','Revisa el código de este proyecto y dime qué se puede mejorar.'],['Hacer un script','Quiero que escribas un script que automatice una tarea. Pregúntame cuál.']];
 const suggBtns=()=>SUG.map(s=>`<button type="button" class="sugg" data-sugg="${esc(s[1])}"${s[2]?' data-tpl="'+s[2]+'"':''}>${esc(s[0])}</button>`).join('');
@@ -413,7 +420,7 @@ function syncMsgs(){
   else {const delta=box.scrollHeight-beforeHeight;if(delta)box.scrollTop=Math.max(0,beforeTop+delta)}
   const bt=$('#busyT');if(bt)bt.textContent=S.busySince?Math.floor((Date.now()-S.busySince)/1000)+' s':'';
   const dn=$('#down');if(dn)dn.classList.toggle('hide',box.scrollHeight-box.scrollTop-box.clientHeight<200)}
-function paint(){if(R.raf)return;R.raf=requestAnimationFrame(()=>{R.raf=0;syncMsgs();drawPerm();drawQ()})}
+function paint(){if(R.raf)return;R.raf=requestAnimationFrame(()=>{R.raf=0;syncMsgs();drawPerm();drawQ();updPreviewBtn()})}
 
 /* ---------- Permisos ---------- */
 const normPerm=p=>{const id=p&&(p.id||p.requestID);return id?{id,sessionID:p.sessionID,title:p.title||p.permission||'Ejecutar acción',detail:(p.metadata&&(p.metadata.command||p.metadata.filePath))||(p.patterns||[]).join(', ')}:null};
@@ -558,7 +565,7 @@ function modeInfo(){return S.agent==='plan'?{emoji:'🧭',title:'Modo Plan',sub:
 function chatShell(){const s=S.sessions.find(x=>x.id===S.cur),m=curModel(),a=modeInfo();
   return `<div class="chat"><div class="top"><button class="rb" id="bk" aria-label="Volver">${ic(I.back,20)}</button><div class="grow"><div class="t" id="ttl" style="font-size:16px;font-weight:750">${esc(s?s.title:'Sesión')}</div><div class="muted sm">${esc(m?m.name:'Selecciona un modelo')}</div></div><button class="rb" id="del" aria-label="Eliminar">${ic(I.trash,20)}</button></div>
   <div class="chatmode"><div class="modeavatar" id="modeAvatar">${a.emoji}</div><div class="modetext"><div class="modetitle" id="modeTitle">${a.title}</div><div class="modesub" id="modeSub">${a.sub}</div></div><button id="chatModel" type="button" aria-label="Elegir modelo" class="model-trigger"><span id="chatModelLabel">${esc(m?m.name:'Elegir modelo')}</span><span aria-hidden="true">⌄</span></button></div>
-  <div class="chattools"><button id="agentMode">${a.emoji} Cambiar modo</button><button id="compact">Compactar</button><button id="undo">Deshacer</button><button id="showDiff">Diff</button></div><div id="msgs" role="log" aria-live="polite"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div><div id="filelist" class="attachments hide"></div><div id="filehint" class="filehint hide"></div>
+  <div class="chattools"><button id="agentMode">${a.emoji} Cambiar modo</button><button id="compact">Compactar</button><button id="undo">Deshacer</button><button id="showDiff">Diff</button><button id="preview" class="pvbtn hide" type="button">${ic(I.play,13)} Vista previa</button></div><div id="msgs" role="log" aria-live="polite"></div><button class="down hide" id="down" aria-label="Ir al final">${ic(I.down,18)}</button><div id="perm"></div><div id="qst"></div><div id="filelist" class="attachments hide"></div><div id="filehint" class="filehint hide"></div>
   <div class="comp"><input id="fileInput" type="file" multiple accept="image/*,.zip,.txt,.md,.pdf,.json,.js,.ts,.tsx,.jsx,.html,.css,.kt,.py,.xml,.yaml,.yml,.toml,.log" hidden><button class="attach" id="attach" aria-label="Adjuntar imágenes o archivos">＋</button><button class="voice" id="voice" type="button" aria-label="Dictar mensaje" title="Dictar mensaje">🎙</button><textarea id="inp" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"></textarea><button class="send" id="go" aria-label="Enviar">${ic(I.send,20)}</button><div class="cfoot"><span id="cfModel">${esc(m?m.name:'Sin modelo')}</span><b id="cfVer">${m&&S.models.some(x=>x.p===m.p&&x.id===m.id&&x.sourceVerified)?'Gratis verificado':''}</b></div></div></div>`}
 function showChatModelPicker(){
   const prior=document.querySelector('.model-picker');if(prior)prior.remove();
@@ -586,6 +593,50 @@ async function send(){
   try{await api('/session/'+S.cur+'/prompt_async',{method:'POST',headers:J,body:JSON.stringify(b)});scheduleLoad(900)}
   catch(e){const k=S.msgs.findIndex(m=>m.info&&!m.info.id&&m.info.role==='user');if(k>=0)S.msgs.splice(k,1);
     setBusy(false);S.requestError='No se pudo enviar el mensaje: '+String(e.message||e);const x=$('#inp');if(x&&!x.value)x.value=t;paint()}}
+/* ---------- Vista previa de lo que genera el asistente (HTML/CSS/JS de la sesión, en un iframe aislado) ---------- */
+const WEB_RE=/\.(html?|css|js)$/i,HTML_RE=/\.html?$/i;
+function webFiles(){const m=new Map();
+  for(const msg of S.msgs)for(const p of (msg.parts||[])){if(p.type!=='tool')continue;const st0=p.state||{},inp=st0.input||{},fp=inp.filePath||inp.path;
+    if(typeof fp!=='string'||!WEB_RE.test(fp)||/node_modules/.test(fp)||st0.status==='error')continue;
+    const e=m.get(fp)||{path:fp,content:''};if(p.tool==='write'&&typeof inp.content==='string')e.content=inp.content;m.set(fp,e)}
+  return m}
+let pvKey='';
+function updPreviewBtn(){const b=$('#preview');if(!b)return;const l=S.msgs[S.msgs.length-1],k=S.msgs.length+':'+(l&&l.parts?l.parts.length:0)+':'+S.busy;if(k===pvKey)return;pvKey=k;
+  b.classList.toggle('hide',![...webFiles().keys()].some(f=>HTML_RE.test(f)))}
+async function readProjectFile(path,fallback){
+  const rel=path.replace(/^\/root\/projects\//,'');
+  for(const t of new Set([rel,path])){try{const r=await api('/file/content?path='+encodeURIComponent(t),{timeout:8000});const c=r&&(typeof r==='string'?r:r.content);if(typeof c==='string'&&c.length)return c}catch(e){}}
+  return fallback||''}
+async function buildPreview(){
+  const files=[...webFiles().values()],loaded=new Map();
+  await Promise.all(files.map(async f=>{loaded.set(f.path,await readProjectFile(f.path,f.content))}));
+  const byName=new Map();loaded.forEach((c,p)=>{if(c)byName.set(p.split('/').pop().toLowerCase(),c)});
+  return{pages:[...loaded.keys()].filter(p=>HTML_RE.test(p)&&loaded.get(p)),loaded,byName}}
+function inlineAssets(html,byName){
+  const get=h=>byName.get(h.split('/').pop().toLowerCase());
+  html=html.replace(/<link\b[^>]*href=["']([^"']+\.css)(?:\?[^"']*)?["'][^>]*>/gi,(m,h)=>{const c=get(h);return c!=null?'<style>'+c.replace(/<\/style/gi,'<\\/style')+'</style>':m});
+  return html.replace(/<script\b([^>]*?)src=["']([^"']+\.js)(?:\?[^"']*)?["']([^>]*)>\s*<\/script>/gi,(m,a,h,b)=>{const c=get(h);return c!=null?'<script'+a+b+'>'+c.replace(/<\/script/gi,'<\\/script')+'<\/script>':m})}
+async function showPreview(){
+  const prev=document.querySelector('.pv');if(prev)prev.remove();
+  let mode=st.get('pvMode','m'),data=null,cur='';
+  const ov=document.createElement('div');ov.className='pv';ov.setAttribute('role','dialog');ov.setAttribute('aria-label','Vista previa');
+  ov.innerHTML='<div class="pvh"><button class="rb" id="pvX" type="button" aria-label="Cerrar">'+ic(I.back,20)+'</button><div class="grow"><b>Vista previa</b><div class="muted sm t" id="pvSub">Cargando…</div></div><div class="seg2" id="pvMode"><button type="button" data-m="m">Móvil</button><button type="button" data-m="f">Completo</button></div><button class="rb" id="pvR" type="button" aria-label="Recargar">'+ic(I.refresh,18)+'</button></div><div class="pvb" id="pvB"></div>';
+  document.body.appendChild(ov);
+  const B=ov.querySelector('#pvB'),sub=ov.querySelector('#pvSub');
+  const modes=()=>ov.querySelectorAll('#pvMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+  const draw=()=>{
+    if(!data||!data.pages.length){sub.textContent='';B.innerHTML='<div class="card" style="margin:auto;width:100%">'+emptyState('Nada que mostrar todavía','No pude leer ningún HTML de esta sesión. Pide al asistente que cree un index.html.')+'</div>';return}
+    if(data.pages.length>1)sub.innerHTML='<select id="pvSel" aria-label="Página">'+data.pages.map(p=>'<option value="'+esc(p)+'"'+(p===cur?' selected':'')+'>'+esc(p.split('/').pop())+'</option>').join('')+'</select>';
+    else sub.textContent=cur.split('/').pop();
+    B.innerHTML='<iframe id="pvF" title="Vista previa" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>';
+    const f=B.querySelector('#pvF');f.className=mode==='m'?'m':'';f.srcdoc=inlineAssets(data.loaded.get(cur),data.byName);
+    const sel=ov.querySelector('#pvSel');if(sel)sel.onchange=()=>{cur=sel.value;draw()}};
+  const load=async()=>{sub.textContent='Cargando…';B.innerHTML='';data=await buildPreview();
+    const keep=data.pages.includes(cur)?cur:(data.pages.find(p=>/(^|\/)index\.html?$/i.test(p))||data.pages[data.pages.length-1]);cur=keep||'';draw()};
+  ov.querySelector('#pvX').onclick=()=>ov.remove();
+  ov.querySelector('#pvR').onclick=load;
+  ov.querySelectorAll('#pvMode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;st.set('pvMode',mode);modes();const f=ov.querySelector('#pvF');if(f)f.className=mode==='m'?'m':''});
+  modes();await load()}
 async function showDiff(){try{const d=await api('/session/'+S.cur+'/diff');const files=Array.isArray(d)?d:[];const html=files.map(f=>{const lines=String(f.diff||'').split('\n').map(line=>`<span class="${line.startsWith('+')?'add':line.startsWith('-')?'del':''}">${esc(line)}</span>`).join('');return `<div class="card" style="margin:8px 0"><b>${esc(f.file||f.path||'Archivo')}</b><div class="diff">${lines||'Sin diferencias disponibles'}</div></div>`}).join('')||'<div class="muted">OpenCode no devolvió diferencias para esta sesión.</div>';const dlog=document.createElement('div');dlog.className='modal';dlog.innerHTML=`<div class="card" style="max-height:82dvh;overflow:auto;width:min(94vw,560px)"><div class="row sp"><b>Diff de la sesión</b><button class="rb" id="closeDiff">×</button></div><div style="margin-top:12px">${html}</div><div class="muted sm" style="margin-top:10px">Para revertir un cambio usa /undo, que revierte el último mensaje de la sesión. La reversión por archivo aún no está disponible.</div></div>`;document.body.appendChild(dlog);dlog.querySelector('#closeDiff').onclick=()=>dlog.remove()}catch(e){S.requestError='No se pudieron cargar los diffs: '+String(e.message||e);paint()}}
 function guessMime(name){const ext=(name.split('.').pop()||'').toLowerCase();return ({png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',pdf:'application/pdf',zip:'application/zip',txt:'text/plain',md:'text/markdown',json:'application/json',html:'text/html',css:'text/css',js:'text/javascript',ts:'text/plain'})[ext]||'application/octet-stream'}
 function drawAttachments(){const box=$('#filelist'),hint=$('#filehint');if(!box)return;box.innerHTML='';box.classList.toggle('hide',!S.attachments.length);if(hint){hint.classList.toggle('hide',!S.attachments.length);hint.textContent='Adjuntos: hasta 6 archivos · 12 MB por archivo. ZIP se adjunta como archivo; el agente debe tener acceso a su contenido para analizarlo.'}S.attachments.forEach((f,n)=>{const e=document.createElement('div');e.className='filechip';e.innerHTML='<b>'+(f.mime.startsWith('image/')?'🖼️':'📎')+'</b><span>'+esc(f.name)+'</span><button type="button" aria-label="Quitar '+esc(f.name)+'">×</button>';e.querySelector('button').onclick=()=>{S.attachments.splice(n,1);drawAttachments()};box.appendChild(e)})}
@@ -614,7 +665,7 @@ function bindChat(){
   const am=$('#agentMode');if(am)am.onclick=()=>{S.agent=S.agent==='plan'?'build':'plan';st.set('agent',S.agent);const a=modeInfo();am.textContent=a.emoji+' Cambiar modo';$('#modeAvatar').textContent=a.emoji;$('#modeTitle').textContent=a.title;$('#modeSub').textContent=a.sub};
   const cm=$('#chatModel');if(cm)cm.onclick=showChatModelPicker;
   const vb=$('#voice');if(vb)vb.onclick=()=>{if(!window.OpenCodeNative||!OpenCodeNative.startVoiceInput){S.requestError='Dictado nativo no disponible en esta compilación.';paint();return}if(voiceListening){OpenCodeNative.stopVoiceInput();voiceListening=false;vb.classList.remove('listening');vb.textContent='🎙'}else{S.requestError='';voiceListening=true;vb.classList.add('listening');vb.textContent='■';OpenCodeNative.startVoiceInput()}};
-  const df=$('#showDiff');if(df)df.onclick=showDiff;
+  const df=$('#showDiff');if(df)df.onclick=showDiff;const pb=$('#preview');if(pb)pb.onclick=showPreview;pvKey='';
   const un=$('#undo');if(un)un.onclick=async()=>{try{await api('/session/'+S.cur+'/undo',{method:'POST',headers:J,body:'{}'});scheduleLoad(150)}catch(e){S.requestError='Undo no disponible: '+String(e.message||e);paint()}};
   const co=$('#compact');if(co)co.onclick=async()=>{try{await api('/session/'+S.cur+'/summarize',{method:'POST',headers:J,body:'{}'});scheduleLoad(200)}catch(e){S.requestError='Compactación no disponible: '+String(e.message||e);paint()}};
   $('#down').onclick=()=>{box.scrollTop=box.scrollHeight};
