@@ -170,3 +170,8 @@ Validación de esta entrega: comprobación de sintaxis JavaScript y estructura Z
 - Abre la página dentro de la app, en un iframe aislado (sin acceso al servidor local ni a los datos de la app), en modo Móvil o Completo. Si hay varias páginas HTML puedes elegir cuál ver.
 - Lee la versión actual de los archivos con la API de OpenCode y, si no responde, usa el contenido que el asistente escribió. Los `style.css` y `.js` locales se incrustan en la página.
 - Límites: el código de la página no tiene almacenamiento local (`localStorage`) por el aislamiento, y las páginas que dependen de un servidor o de una compilación (por ejemplo React con build) no se verán.
+
+## 0.14.0 — conectar Forja IA con este motor
+- Ajustes → **Conectar con Forja IA**: muestra la URL del motor (`http://127.0.0.1:4096`) y copia la contraseña local. En Forja IA: Ajustes → Proveedores → «OpenCode (motor del móvil)».
+- El servidor arranca con `--cors` para `https://criptobox.github.io` y `https://appassets.androidplatform.net` **solo si esta versión de OpenCode lo admite** (se comprueba con `--help` antes; un flag desconocido haría fallar el arranque). Los orígenes `localhost`/`127.0.0.1` ya los acepta el motor.
+- Nota: los cambios de Kotlin y del arranque no se compilaron ni probaron en un teléfono en el entorno de desarrollo; compila con GitHub Actions y comprueba en el móvil.

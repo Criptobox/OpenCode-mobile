@@ -327,7 +327,13 @@ class OcRuntime(private val ctx: Context) {
 
     fun startServer(): Process {
         prepareLibs()
-        val cmd = "mkdir -p /root/projects && cd /root/projects && exec opencode web --hostname 127.0.0.1 --port $port"
+        // Forja IA (PWA y app Android) habla con este servidor desde otro origen. El motor ya
+        // acepta localhost/127.0.0.1; los demás se añaden con --cors, pero SOLO si esta versión
+        // del binario lo admite: un flag desconocido haría fallar el arranque y la app entera.
+        val cmd = "mkdir -p /root/projects && cd /root/projects && C=''; " +
+            "if opencode web --help 2>&1 | grep -q -- '--cors'; then " +
+            "C='--cors https://criptobox.github.io --cors https://appassets.androidplatform.net'; fi; " +
+            "exec opencode web --hostname 127.0.0.1 --port $port \$C"
         val pb = ProcessBuilder(guestCmd(cmd, serverEnv()))
             .redirectErrorStream(true).redirectOutput(logFile)
         pb.environment().putAll(env())

@@ -235,6 +235,12 @@ class MainActivity : Activity() {
         }
         addJavascriptInterface(object {
             @JavascriptInterface fun taskFinished(title: String) { ui.post { RuntimeService.notifyTaskFinished(this@MainActivity, title.take(100)) } }
+            /** Datos para conectar Forja IA con este motor: solo los ve la propia interfaz (127.0.0.1). */
+            @JavascriptInterface fun getConnection(): String = JSONObject()
+                .put("url", "http://127.0.0.1:${rt.port}")
+                .put("user", if (OcRuntime.SECURE_SERVER) OcRuntime.SERVER_USER else "")
+                .put("password", if (OcRuntime.SECURE_SERVER) rt.serverPassword() else "")
+                .toString()
             @JavascriptInterface fun setTheme(light: Boolean) {
                 ui.post {
                     webLight = light
